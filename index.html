@@ -1,0 +1,2574 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="阳光大美妞的工作台">
+<meta name="theme-color" content="#A5D6DB">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.svg">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<title>阳光大美妞的工作台</title>
+<style>
+/* ==================== Reset & Variables ==================== */
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+:root {
+  /* Healing Pastel Palette — 淡淡治愈风 */
+  --sky: #A5D6DB;              /* 主色 - 淡蓝灰 */
+  --sky-deep: #7BB8BF;
+  --sky-soft: #C8E5E8;
+  --sky-pale: #E4F0F2;
+
+  --cream: #F9E9D9;            /* 点缀 - 奶油米桃 */
+  --cream-deep: #E8C9A8;
+  --cream-soft: #FDF4EA;
+
+  --moss: #E8E8C6;             /* 背景 - 米黄绿 */
+  --moss-deep: #C9CB9C;
+  --moss-soft: #F2F2DC;
+
+  --bark: #4D4542;             /* 文字 - 暖棕深 */
+  --bark-mid: #7A6F68;
+  --bark-light: #A89F99;
+
+  /* Cards */
+  --card: #FCFAF6;             /* 暖白卡 */
+  --card-soft: #F6F0E4;
+
+  /* Borders */
+  --line: #DDD7CC;
+  --line-soft: #ECE6D9;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(77, 69, 66, 0.04);
+  --shadow: 0 2px 12px rgba(77, 69, 66, 0.06);
+  --shadow-lg: 0 8px 24px rgba(77, 69, 66, 0.08);
+  --shadow-strong: 0 12px 32px rgba(77, 69, 66, 0.12);
+
+  --radius: 18px;
+  --radius-sm: 12px;
+  --radius-lg: 24px;
+
+  --sidebar-width: 72px;
+  --safe-top: var(--safe-top-px, 0px);
+  --safe-bottom: var(--safe-bottom-px, 0px);
+}
+html, body {
+  height: 100%;
+  height: 100dvh;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: pan-x pan-y;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  font-family: -apple-system, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  font-size: 14px;
+  color: var(--bark);
+  background: var(--moss-soft);
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+}
+input, textarea, select { font-family: inherit; font-size: inherit; user-select: text; }
+
+/* ==================== Healing Pastel Background ==================== */
+body {
+  background-color: #F4F1E6;
+  background-image:
+    radial-gradient(ellipse 70% 50% at 5% 5%, rgba(165, 214, 219, 0.45), transparent 65%),
+    radial-gradient(ellipse 60% 45% at 95% 10%, rgba(249, 233, 217, 0.5), transparent 65%),
+    radial-gradient(ellipse 55% 40% at 90% 90%, rgba(232, 232, 198, 0.55), transparent 65%),
+    radial-gradient(ellipse 50% 35% at 10% 95%, rgba(165, 214, 219, 0.3), transparent 65%);
+  background-attachment: fixed;
+}
+/* Subtle paper grain */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: radial-gradient(circle, rgba(77, 69, 66, 0.025) 0.8px, transparent 1.2px);
+  background-size: 24px 24px;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.7;
+}
+
+/* ==================== Floating Animal Doodles ==================== */
+.animal-doodle {
+  position: fixed;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.5;
+  animation: gentleFloat 6s ease-in-out infinite;
+}
+@keyframes gentleFloat {
+  0%, 100% { transform: translateY(0) rotate(-2deg); }
+  50% { transform: translateY(-12px) rotate(2deg); }
+}
+.animal-doodle.ad1 { top: 6%; right: 8%; width: 60px; animation-delay: 0s; }
+.animal-doodle.ad2 { top: 35%; right: 4%; width: 48px; animation-delay: 1.5s; opacity: 0.4; }
+.animal-doodle.ad3 { bottom: 12%; right: 12%; width: 52px; animation-delay: 3s; }
+.animal-doodle.ad4 { top: 55%; right: 6%; width: 40px; animation-delay: 2s; opacity: 0.35; }
+.animal-doodle.ad5 { bottom: 40%; right: 3%; width: 44px; animation-delay: 4s; opacity: 0.3; }
+
+/* ==================== Layout ==================== */
+#app {
+  display: flex;
+  height: 100vh;
+  height: 100dvh;
+  width: 100vw;
+  width: 100dvw;
+  overflow: hidden;
+  z-index: 1;
+  position: relative;
+  background: transparent;
+}
+
+/* ==================== Sidebar — Soft Sky Blue ==================== */
+.sidebar {
+  width: var(--sidebar-width);
+  min-width: var(--sidebar-width);
+  height: 100%;
+  background: linear-gradient(180deg, #A5D6DB 0%, #92C8CD 55%, #7BB8BF 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: max(var(--safe-top-px, 44px), 14px) 0 max(var(--safe-bottom-px, 34px), 16px);
+  gap: 8px;
+  box-shadow: 3px 0 14px rgba(123, 184, 191, 0.18);
+  z-index: 10;
+  position: relative;
+  flex-shrink: 0;
+}
+/* Stitched dashed line on sidebar edge */
+.sidebar::after {
+  content: '';
+  position: absolute;
+  right: 4px;
+  top: 12px;
+  bottom: 12px;
+  width: 1px;
+  background-image: repeating-linear-gradient(to bottom, rgba(255,255,255,0.45) 0 5px, transparent 5px 10px);
+}
+.sidebar-logo {
+  width: 52px;
+  height: 52px;
+  margin-bottom: 6px;
+  border-radius: 16px;
+  background: #FFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 3px solid #FFF;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.8);
+  overflow: hidden;
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.2s;
+}
+.sidebar-logo:active { transform: scale(0.9); }
+.sidebar-logo img {
+  width: 100%;
+  height: 100%;
+  border-radius: 13px;
+  object-fit: cover;
+}
+#logo-placeholder {
+  font-size: 22px;
+  color: var(--sky-deep);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+  gap: 1px;
+}
+#logo-placeholder .hint-text {
+  font-size: 7px;
+  color: var(--bark-light);
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+.nav-item {
+  width: 60px;
+  padding: 10px 4px;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  position: relative;
+  flex-shrink: 0;
+}
+.nav-item:active { transform: scale(0.9); }
+.nav-item .nav-icon {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+}
+.nav-item .nav-label {
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.85);
+  text-align: center;
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+.nav-item.active {
+  background: rgba(255, 255, 255, 0.25);
+  border: 2px dashed rgba(255, 255, 255, 0.5);
+}
+.nav-item.active .nav-label { color: #fff; font-weight: 800; }
+.nav-item.active .nav-icon { transform: scale(1.1); }
+.sidebar-spacer { flex: 1; }
+.sidebar-footer {
+  font-size: 8px;
+  color: rgba(255, 255, 255, 0.7);
+  text-align: center;
+  line-height: 1.5;
+  padding: 0 4px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+.sidebar-paw {
+  font-size: 16px;
+  opacity: 0.5;
+  margin-bottom: 4px;
+}
+
+/* ==================== Main Content ==================== */
+.main-content {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding-top: max(110px, calc(var(--safe-top-px, 44px) + 70px));
+  padding-right: 14px;
+  padding-bottom: max(16px, var(--safe-bottom-px, 34px));
+  padding-left: 14px;
+  position: relative;
+  background: linear-gradient(180deg, rgba(244, 241, 230, 0.4) 0%, rgba(253, 244, 234, 0.6) 60%, rgba(249, 233, 217, 0.5) 100%);
+}
+.main-content::-webkit-scrollbar { width: 0; }
+
+.page { display: none; animation: fadeIn 0.4s ease; }
+.page.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ==================== Page Header ==================== */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding: 0 4px;
+  position: relative;
+}
+.page-title {
+  font-size: 23px;
+  font-weight: 800;
+  color: var(--bark);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  letter-spacing: 0.5px;
+}
+/* Hand-drawn squiggly underline */
+.page-title::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: -2px;
+  right: -10px;
+  height: 7px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 8' preserveAspectRatio='none'%3E%3Cpath d='M0 4 Q 10 0, 20 4 T 40 4 T 60 4 T 80 4 T 100 4 T 120 4' fill='none' stroke='%23A5D6DB' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  z-index: -1;
+  opacity: 0.8;
+}
+.page-title .bow {
+  font-size: 18px;
+  filter: drop-shadow(0 1px 2px rgba(255, 143, 168, 0.3));
+}
+.btn-add {
+  background: var(--bark);
+  color: #FFF;
+  border: 2px solid var(--bark);
+  padding: 9px 14px;
+  border-radius: 22px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 3px 0 rgba(77, 69, 66, 0.5), 0 4px 10px rgba(77, 69, 66, 0.18);
+  transition: all 0.15s;
+  white-space: nowrap;
+  letter-spacing: 0.5px;
+  position: relative;
+}
+.btn-add:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 rgba(77, 69, 66, 0.5);
+}
+
+/* ==================== Collection Group (合集) ==================== */
+.accepted-stats {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  background: linear-gradient(135deg, var(--card) 0%, var(--card-soft) 100%);
+  border-radius: var(--radius);
+  padding: 14px 12px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-sm);
+  border: 1.5px dashed var(--line);
+}
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  flex: 1;
+}
+.stat-num {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--bark);
+  font-family: Georgia, "PingFang SC", serif;
+  line-height: 1.2;
+}
+.stat-item.done .stat-num { color: #7BB89C; }
+.stat-item.pending .stat-num { color: var(--sky-deep); }
+.stat-label {
+  font-size: 10px;
+  color: var(--bark-mid);
+  letter-spacing: 1px;
+}
+.stat-divider {
+  width: 1px;
+  height: 30px;
+  background: var(--line);
+  margin: 0 4px;
+}
+
+/* ==================== Month Archive Group ==================== */
+.month-group {
+  margin-bottom: 10px;
+  border-radius: 18px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.5);
+  border: 1.5px dashed rgba(165, 214, 219, 0.5);
+  transition: all 0.2s;
+}
+.month-group.current {
+  border-color: var(--sky);
+  background: linear-gradient(135deg, rgba(165, 214, 219, 0.15) 0%, rgba(232, 232, 198, 0.12) 100%);
+  box-shadow: 0 2px 10px rgba(165, 214, 219, 0.15);
+}
+.month-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s;
+}
+.month-header:active {
+  background: rgba(165, 214, 219, 0.12);
+}
+.month-group.current .month-header {
+  background: linear-gradient(90deg, rgba(165, 214, 219, 0.18) 0%, transparent 100%);
+}
+.month-icon {
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.month-label {
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--bark);
+  font-family: Georgia, 'Songti SC', serif;
+  flex-shrink: 0;
+}
+.month-group.current .month-label {
+  color: var(--sky-deep);
+}
+.month-summary {
+  flex: 1;
+  text-align: right;
+  font-size: 10.5px;
+  color: var(--bark-mid);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  margin-left: 6px;
+}
+.month-arrow {
+  font-size: 10px;
+  color: var(--bark-light);
+  flex-shrink: 0;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-left: 4px;
+}
+.month-group.collapsed .month-arrow {
+  transform: rotate(-90deg);
+}
+.month-group.collapsed .month-content {
+  display: none;
+}
+.month-content {
+  padding: 4px 10px 10px;
+  animation: monthFadeIn 0.3s ease;
+}
+@keyframes monthFadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.collection-group {
+  background: linear-gradient(135deg, rgba(165, 214, 219, 0.18) 0%, rgba(249, 233, 217, 0.22) 100%);
+  border: 2px dashed var(--sky-deep);
+  border-radius: var(--radius);
+  padding: 14px 12px 6px;
+  margin-bottom: 18px;
+  position: relative;
+}
+.collection-group::before {
+  content: '合集';
+  position: absolute;
+  top: -10px;
+  left: 14px;
+  background: var(--sky-deep);
+  color: #FFF;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: 10px;
+  letter-spacing: 1px;
+  box-shadow: 0 2px 6px rgba(123, 184, 191, 0.4);
+}
+.collection-group.completed::before {
+  background: var(--bark-light);
+}
+.collection-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+  flex-wrap: wrap;
+}
+.collection-icon {
+  color: var(--sky-deep);
+  font-size: 16px;
+}
+.collection-group.completed .collection-icon { color: var(--bark-light); }
+.collection-name {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--bark);
+  flex: 1;
+  min-width: 0;
+  word-break: break-all;
+}
+.collection-count {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--sky-deep);
+  background: rgba(165, 214, 219, 0.25);
+  padding: 2px 8px;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+.collection-group.completed .collection-count {
+  color: var(--bark-light);
+  background: rgba(168, 159, 153, 0.18);
+}
+.collection-fee {
+  font-size: 14px;
+  font-weight: 800;
+  color: #B8865A;
+  flex-shrink: 0;
+}
+.collection-deadline {
+  font-size: 12px;
+  color: var(--bark-mid);
+  margin-bottom: 10px;
+  padding-left: 24px;
+}
+.collection-cards .task-card {
+  background: #FFF;
+  margin-bottom: 10px;
+}
+
+/* ==================== Task Cards (Accepted) ==================== */
+.task-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 14px;
+  box-shadow: var(--shadow);
+  position: relative;
+  transition: all 0.25s;
+  border: 2px solid var(--line);
+}
+.task-card.completed { opacity: 0.55; background: var(--moss-soft); }
+.task-card.completed .task-title {
+  text-decoration: line-through;
+  text-decoration-color: var(--bark-light);
+  color: var(--bark-light);
+}
+/* Washi tape decoration */
+.task-card::after {
+  content: '';
+  position: absolute;
+  top: -10px;
+  left: 20px;
+  width: 58px;
+  height: 18px;
+  background: linear-gradient(135deg, rgba(255, 143, 168, 0.6) 0%, rgba(93, 180, 192, 0.5) 100%);
+  transform: rotate(-4deg);
+  border-radius: 1px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  border-left: 1px dashed rgba(255, 255, 255, 0.6);
+  border-right: 1px dashed rgba(255, 255, 255, 0.6);
+}
+.task-card-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+/* Checkbox — cute rounded */
+.task-checkbox {
+  width: 26px;
+  height: 26px;
+  min-width: 26px;
+  border: 2.5px solid var(--sky);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.22s;
+  margin-top: 1px;
+  background: var(--sky-pale);
+  position: relative;
+}
+.task-checkbox:active { transform: scale(0.85); }
+.task-checkbox.checked {
+  background: var(--sky);
+  border-color: var(--sky-deep);
+  transform: rotate(-3deg);
+}
+.task-checkbox.checked::after {
+  content: '✓';
+  color: #FFF;
+  font-size: 16px;
+  font-weight: 800;
+}
+.task-title-area { flex: 1; min-width: 0; }
+.task-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--bark);
+  line-height: 1.4;
+  letter-spacing: 0.2px;
+}
+.task-deadline {
+  font-size: 11px;
+  color: var(--bark);
+  margin-top: 3px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+.task-deadline.urgent { color: #C97D5D; }
+.task-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding-left: 34px;
+  flex-wrap: wrap;
+}
+.publish-format {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 10px;
+  background: var(--cream-soft);
+  color: var(--bark);
+  border: 1.5px dashed var(--cream-deep);
+  letter-spacing: 0.3px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.report-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 10px;
+  border: 1.5px dashed;
+  cursor: pointer;
+  transition: all 0.2s;
+  user-select: none;
+  letter-spacing: 0.3px;
+}
+.report-badge:active { transform: scale(0.95); }
+.report-badge.status-none {
+  background: rgba(255,255,255,0.6);
+  color: #B0B0A8;
+  border-color: #D4D2C8;
+}
+.report-badge.status-reported {
+  background: var(--sky-pale);
+  color: var(--sky-deep);
+  border-color: var(--sky);
+}
+.report-badge.status-accepted {
+  background: linear-gradient(135deg, #E5F0D8 0%, #D5E8C0 100%);
+  color: #6B8E3D;
+  border-color: #B8CC8E;
+  border-style: solid;
+}
+.btn-delete {
+  width: 30px;
+  height: 30px;
+  min-width: 30px;
+  border: 1.5px solid transparent;
+  background: transparent;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--bark-light);
+  transition: all 0.2s;
+}
+.btn-delete:active {
+  transform: scale(0.82);
+  background: rgba(232, 201, 168, 0.18);
+  border-color: var(--cream-deep);
+}
+.task-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-left: 34px;
+}
+.task-detail-row {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--bark);
+}
+.task-detail-label {
+  color: var(--bark-light);
+  min-width: 60px;
+  font-weight: 700;
+  font-size: 11px;
+  flex-shrink: 0;
+}
+.task-detail-value { flex: 1; word-break: break-word; min-width: 0; }
+.task-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-left: 34px;
+  margin-top: 8px;
+}
+.tag {
+  padding: 4px 10px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  border: 1.5px dashed;
+}
+.tag-advance { background: var(--cream-soft); color: var(--cream-deep); border-color: var(--cream); }
+.tag-payment { background: var(--sky-pale); color: var(--sky-deep); border-color: var(--sky); }
+.tag-refunded { background: #E5F0D8; color: #6B8E3D; border-color: #B8CC8E; }
+.tag-unrefunded { background: #FCE8DE; color: #C9654A; border-color: #E8A88E; }
+.tag-published { background: var(--sky-pale); color: var(--sky-deep); border-color: var(--sky); }
+.tag-unpublished { background: var(--cream-soft); color: var(--bark); border-color: var(--cream-deep); }
+.tag-wechat {
+  background: var(--sky-pale);
+  color: var(--sky-deep);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  text-decoration: none;
+  border-color: var(--sky);
+}
+
+/* ==================== Pending Task Cards ==================== */
+.pending-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 14px;
+  box-shadow: var(--shadow);
+  border: 2px solid var(--line);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: all 0.25s;
+  position: relative;
+}
+.pending-card::after {
+  content: '';
+  position: absolute;
+  top: -10px;
+  right: 20px;
+  width: 58px;
+  height: 18px;
+  background: linear-gradient(135deg, rgba(142, 202, 230, 0.6) 0%, rgba(197, 184, 232, 0.5) 100%);
+  transform: rotate(3deg);
+  border-radius: 1px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  border-left: 1px dashed rgba(255, 255, 255, 0.6);
+  border-right: 1px dashed rgba(255, 255, 255, 0.6);
+}
+.pending-card.completed { opacity: 0.55; background: var(--moss-soft); }
+.pending-card.completed::after {
+  background: linear-gradient(135deg, rgba(93, 180, 192, 0.3) 0%, rgba(93, 180, 192, 0.25) 100%);
+}
+.pending-card.completed .pending-info-name { text-decoration: line-through; }
+.pending-info { flex: 1; min-width: 0; }
+.pending-info-name {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--bark);
+  margin-bottom: 5px;
+  letter-spacing: 0.2px;
+}
+.pending-info-row {
+  font-size: 12px;
+  color: var(--bark-mid);
+  line-height: 1.5;
+  font-weight: 500;
+}
+.pending-info-row span { color: var(--sky-deep); font-weight: 700; }
+
+/* ==================== Treasury Dashboard ==================== */
+.dashboard {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.dash-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 18px 12px;
+  text-align: center;
+  box-shadow: var(--shadow);
+  border: 2px solid var(--line);
+  position: relative;
+  transition: all 0.25s;
+}
+/* Washi tape on dashboard cards */
+.dash-card::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%) rotate(-2deg);
+  width: 42px;
+  height: 16px;
+  background: rgba(93, 180, 192, 0.5);
+  border-radius: 1px;
+  border-left: 1px dashed rgba(255, 255, 255, 0.6);
+  border-right: 1px dashed rgba(255, 255, 255, 0.6);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+.dash-card.water-above::before { background: rgba(142, 202, 230, 0.6); }
+.dash-card.water-below::before { background: rgba(255, 214, 107, 0.55); }
+.dash-card.total::before { background: rgba(255, 143, 168, 0.55); transform: translateX(-50%) rotate(2deg); }
+.dash-card.total {
+  grid-column: 1 / -1;
+  background: linear-gradient(135deg, var(--sky) 0%, var(--cream-deep) 100%);
+  border-color: var(--sky-deep);
+  color: #FFF;
+}
+.dash-label {
+  font-size: 11px;
+  color: var(--bark-mid);
+  margin-bottom: 8px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+.dash-card.total .dash-label { color: rgba(255, 255, 255, 0.9); }
+.dash-value {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--bark);
+  font-family: Georgia, "Times New Roman", serif;
+}
+.dash-card.total .dash-value { color: #FFF; font-size: 30px; }
+.dash-card.water-above .dash-value { color: var(--sky-deep); }
+.dash-card.water-below .dash-value { color: var(--cream-deep); }
+.dash-icon { font-size: 22px; margin-bottom: 6px; }
+
+.treasury-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow);
+  border: 2px solid var(--line);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+}
+.treasury-card::after {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 24px;
+  width: 50px;
+  height: 16px;
+  background: linear-gradient(135deg, rgba(255, 214, 107, 0.55) 0%, rgba(255, 143, 168, 0.45) 100%);
+  transform: rotate(-2deg);
+  border-radius: 1px;
+  border-left: 1px dashed rgba(255, 255, 255, 0.6);
+  border-right: 1px dashed rgba(255, 255, 255, 0.6);
+}
+.treasury-info { flex: 1; min-width: 0; }
+.treasury-name {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--bark);
+  margin-bottom: 5px;
+  letter-spacing: 0.2px;
+}
+.treasury-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 11px;
+}
+.treasury-amount {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--bark);
+  text-align: right;
+  min-width: 70px;
+  font-family: Georgia, serif;
+}
+.treasury-amount.received { color: var(--sky-deep); }
+.treasury-amount.unreceived { color: var(--cream-deep); }
+
+.section-label {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--bark);
+  margin: 18px 0 12px;
+  padding-left: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  letter-spacing: 0.5px;
+}
+.section-label::before {
+  content: '';
+  width: 4px;
+  height: 18px;
+  background: var(--cream-deep);
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px var(--bark);
+}
+.section-label::after {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: 16px;
+  right: 0;
+  height: 4px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 4' preserveAspectRatio='none'%3E%3Cpath d='M0 2 Q 12 0, 25 2 T 50 2 T 75 2 T 100 2' fill='none' stroke='%235DB4C0' stroke-width='1.5' stroke-linecap='round' opacity='0.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  z-index: -1;
+}
+
+/* ==================== Empty State ==================== */
+.empty-state {
+  text-align: center;
+  padding: 50px 20px;
+  color: var(--bark-mid);
+}
+.empty-state .empty-icon {
+  font-size: 56px;
+  margin-bottom: 14px;
+  opacity: 0.5;
+  animation: bobble 3s ease-in-out infinite;
+}
+@keyframes bobble {
+  0%, 100% { transform: translateY(0) rotate(-3deg); }
+  50% { transform: translateY(-8px) rotate(3deg); }
+}
+.empty-state .empty-text {
+  font-size: 14px;
+  line-height: 1.8;
+  font-weight: 700;
+  color: var(--bark);
+}
+.empty-state .empty-hint {
+  font-size: 12px;
+  margin-top: 8px;
+  color: var(--bark);
+  font-weight: 600;
+}
+.empty-state .empty-animal {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 10px;
+  opacity: 0.6;
+}
+
+/* ==================== Modal — Mobile-First (no fixed max-width) ==================== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(77, 69, 66, 0.45);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 100;
+  display: none;
+  align-items: flex-end;
+  justify-content: center;
+  animation: overlayIn 0.2s;
+}
+.modal-overlay.show { display: flex; }
+@keyframes overlayIn { from { opacity: 0; } to { opacity: 1; } }
+.modal {
+  background: var(--card);
+  border-radius: 24px 24px 0 0;
+  /* No max-width on mobile — always 100% width */
+  width: 100%;
+  max-height: 90vh;
+  max-height: 90dvh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 22px 18px calc(22px + var(--safe-bottom-px, 34px));
+  animation: modalIn 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  -webkit-overflow-scrolling: touch;
+  position: relative;
+  border-top: 3px solid var(--sky-soft);
+  box-shadow: 0 -8px 32px rgba(77, 69, 66, 0.15);
+}
+.modal::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 48px;
+  height: 5px;
+  background: var(--sky-soft);
+  border-radius: 3px;
+  opacity: 0.7;
+}
+@keyframes modalIn { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+  padding-top: 8px;
+}
+.modal-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--bark);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  letter-spacing: 0.3px;
+}
+.modal-close {
+  width: 32px;
+  height: 32px;
+  border: 1.5px solid var(--line);
+  background: var(--card-soft);
+  border-radius: 50%;
+  font-size: 16px;
+  color: var(--bark-mid);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  font-weight: 600;
+}
+.modal-close:active { transform: scale(0.82) rotate(90deg); background: var(--sky-pale); }
+
+/* ==================== Form ==================== */
+.form-group { margin-bottom: 14px; }
+.form-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--bark);
+  margin-bottom: 6px;
+  letter-spacing: 0.3px;
+}
+.form-label .req { color: var(--cream-deep); }
+.form-label .hint { color: var(--bark-light); font-weight: 500; font-size: 11px; margin-left: 4px; }
+.form-input, .form-textarea, .form-select {
+  width: 100%;
+  padding: 11px 14px;
+  border: 2px solid var(--line);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  color: var(--bark);
+  background: var(--card-soft);
+  transition: all 0.22s;
+  outline: none;
+  font-weight: 500;
+}
+.form-input:focus, .form-textarea:focus, .form-select:focus {
+  border-color: var(--sky);
+  background: #FFF;
+  box-shadow: 0 0 0 4px rgba(93, 180, 192, 0.15);
+}
+.form-textarea { resize: none; min-height: 64px; line-height: 1.5; }
+.form-row { display: flex; gap: 10px; }
+.form-row .form-group { flex: 1; }
+
+/* Toggle switch */
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  background: var(--card-soft);
+  border: 1.5px dashed var(--line);
+  border-radius: var(--radius-sm);
+  margin-bottom: 10px;
+  transition: all 0.22s;
+}
+.toggle-row .toggle-label { font-size: 13px; font-weight: 700; color: var(--bark); letter-spacing: 0.2px; }
+.toggle {
+  width: 46px;
+  height: 26px;
+  background: var(--line);
+  border: 1.5px solid var(--line);
+  border-radius: 13px;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.28s;
+  flex-shrink: 0;
+}
+.toggle.on { background: var(--sky); border-color: var(--sky-deep); }
+.toggle::after {
+  content: '';
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  background: #FFF;
+  border-radius: 50%;
+  top: 2px;
+  left: 2px;
+  transition: left 0.28s;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.12);
+}
+.toggle.on::after { left: 20px; }
+
+.conditional-field { display: none; animation: fadeIn 0.22s; }
+.conditional-field.show { display: block; }
+
+.form-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 22px;
+}
+.btn-cancel {
+  flex: 1;
+  padding: 13px;
+  border: 1.5px solid var(--line);
+  background: var(--card-soft);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--bark-mid);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-confirm {
+  flex: 2;
+  padding: 13px;
+  border: 2px solid var(--bark);
+  background: var(--bark);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 800;
+  color: #FFF;
+  cursor: pointer;
+  box-shadow: 0 3px 0 rgba(77, 69, 66, 0.5), 0 4px 10px rgba(77, 69, 66, 0.18);
+  transition: all 0.15s;
+  letter-spacing: 0.5px;
+}
+.btn-cancel:active, .btn-confirm:active {
+  transform: translateY(2px);
+}
+.btn-confirm:active { box-shadow: 0 1px 0 rgba(77, 69, 66, 0.5); }
+
+/* ==================== Toast ==================== */
+.toast {
+  position: fixed;
+  bottom: 90px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--bark);
+  color: #FFF;
+  padding: 11px 22px;
+  border-radius: 22px;
+  font-size: 13px;
+  font-weight: 700;
+  z-index: 200;
+  opacity: 0;
+  transition: all 0.3s;
+  pointer-events: none;
+  white-space: nowrap;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+  letter-spacing: 0.3px;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ==================== Publish Banner ==================== */
+.publish-banner {
+  margin: -16px -16px 12px -16px;
+  padding: 12px 16px;
+  font-size: 13px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: var(--radius) var(--radius) 0 0;
+  position: relative;
+  letter-spacing: 0.3px;
+}
+.publish-banner.published {
+  background: linear-gradient(90deg, var(--sky-pale), var(--moss-soft));
+  color: var(--bark);
+  border-bottom: 2px dashed var(--sky);
+}
+.publish-banner.unpublished {
+  background: linear-gradient(90deg, var(--cream-soft), var(--sky-pale));
+  color: var(--bark);
+  border-bottom: 2px dashed var(--cream-deep);
+}
+.publish-banner.unpublished .pulse-dot {
+  width: 9px; height: 9px;
+  background: var(--cream-deep);
+  border-radius: 50%;
+  animation: pulseDot 1.2s infinite;
+  box-shadow: 0 0 8px rgba(232, 201, 168, 0.6);
+}
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.3; transform: scale(1.4); }
+}
+.publish-banner .banner-icon { font-size: 16px; }
+
+/* ==================== Editable Cards ==================== */
+.task-card, .pending-card, .treasury-card {
+  cursor: pointer;
+}
+.task-card:active, .pending-card:active, .treasury-card:active {
+  transform: scale(0.98);
+}
+
+/* ==================== Task Card Expand/Collapse ==================== */
+.task-card .task-details,
+.task-card .task-tags {
+  display: none;
+}
+.task-card.expanded .task-details {
+  display: flex;
+  margin-top: 10px;
+}
+.task-card.expanded .task-tags {
+  display: flex;
+}
+.expand-toggle {
+  font-size: 11px;
+  color: var(--bark-light);
+  text-align: center;
+  margin-top: 10px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+.expand-toggle .arrow {
+  display: inline-block;
+  transition: transform 0.25s;
+  font-size: 10px;
+}
+.task-card.expanded .expand-toggle .arrow {
+  transform: rotate(180deg);
+}
+.edit-hint {
+  font-size: 10px;
+  color: var(--bark-light);
+  text-align: right;
+  margin-top: 10px;
+  opacity: 0.5;
+  padding-left: 36px;
+  font-style: italic;
+  font-weight: 600;
+}
+.btn-edit {
+  width: 30px;
+  height: 30px;
+  min-width: 30px;
+  border: 1.5px solid transparent;
+  background: transparent;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--sky-deep);
+  transition: all 0.2s;
+}
+.btn-edit:active {
+  transform: scale(0.82);
+  background: rgba(93, 180, 192, 0.12);
+  border-color: var(--sky-soft);
+}
+
+/* Unreceived note */
+.unreceived-note {
+  background: var(--cream-soft);
+  border: 2px dashed var(--cream);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  font-size: 11px;
+  color: var(--cream-deep);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+}
+
+/* ==================== Responsive — Small Phones (iPhone SE/15 Pro) ==================== */
+@media (max-width: 480px) {
+  :root { --sidebar-width: 60px; }
+  .sidebar { padding: max(var(--safe-top-px, 44px), 10px) 0 max(var(--safe-bottom-px, 34px), 12px); gap: 5px; }
+  .sidebar-logo { width: 42px; height: 42px; border-radius: 12px; border-width: 2px; }
+  #logo-placeholder { font-size: 16px; }
+  .nav-item { width: 50px; padding: 6px 2px; border-radius: 12px; }
+  .nav-item .nav-icon { font-size: 18px; }
+  .nav-item .nav-label { font-size: 8.5px; }
+  .main-content {
+    padding-top: max(80px, calc(var(--safe-top-px, 44px) + 20px));
+    padding-right: 10px;
+    padding-bottom: max(12px, var(--safe-bottom-px, 34px));
+    padding-left: 10px;
+  }
+  .page-header { padding: 0; }
+  .page-title { font-size: 19px; }
+  .btn-add { padding: 8px 12px; font-size: 11px; border-radius: 20px; }
+  .task-card, .pending-card, .treasury-card { padding: 12px; border-radius: 16px; }
+  .dash-card { padding: 14px 8px; border-radius: 16px; }
+  .dash-value { font-size: 18px; }
+  .dash-card.total .dash-value { font-size: 24px; }
+  .task-card::after, .pending-card::after, .treasury-card::after, .dash-card::before { width: 44px; height: 13px; }
+  .animal-doodle { display: none; }
+  .section-label { font-size: 14px; }
+}
+
+/* ==================== Tablet & Desktop (centered modal as floating card) ==================== */
+@media (min-width: 600px) {
+  .modal-overlay { align-items: center; padding: 20px; }
+  .modal {
+    max-width: 480px;
+    border-radius: 24px;
+    max-height: 85vh;
+    max-height: 85dvh;
+    box-shadow: 0 12px 40px rgba(77, 69, 66, 0.2);
+  }
+}
+
+/* ==================== Hidden file input ==================== */
+.hidden-file { display: none; }
+
+/* ==================== Bottom Kitty Decoration ==================== */
+.kitty-corner {
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  width: 44px;
+  height: 44px;
+  opacity: 0.15;
+  pointer-events: none;
+  z-index: 1;
+  animation: gentleFloat 5s ease-in-out infinite;
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- ==================== Sidebar ==================== -->
+  <nav class="sidebar">
+    <div class="sidebar-logo" id="sidebar-logo" onclick="uploadIcon()" title="点击更换图标">
+      <div id="logo-placeholder">📷</div>
+    </div>
+    <div class="nav-item active" data-page="accepted" onclick="switchPage('accepted')">
+      <div class="nav-icon">📝</div>
+      <div class="nav-label">已接任务</div>
+    </div>
+    <div class="nav-item" data-page="pending" onclick="switchPage('pending')">
+      <div class="nav-icon">📥</div>
+      <div class="nav-label">未接任务</div>
+    </div>
+    <div class="nav-item" data-page="treasury" onclick="switchPage('treasury')">
+      <div class="nav-icon">💰</div>
+      <div class="nav-label">小金库</div>
+    </div>
+    <div class="sidebar-spacer"></div>
+    <div class="sidebar-paw">🐾</div>
+    <div class="sidebar-footer">阳光<br>大美妞</div>
+  </nav>
+
+  <!-- ==================== Main Content ==================== -->
+  <main class="main-content">
+    <!-- Page: Accepted Tasks -->
+    <section class="page active" id="page-accepted">
+      <div class="page-header">
+        <div class="page-title"><span class="bow">🎀</span>已接任务</div>
+        <button class="btn-add" onclick="openModal('accepted')">＋ 新增任务</button>
+      </div>
+      <div id="accepted-list"></div>
+    </section>
+
+    <!-- Page: Pending Tasks -->
+    <section class="page" id="page-pending">
+      <div class="page-header">
+        <div class="page-title"><span class="bow">🎀</span>未接任务</div>
+        <button class="btn-add" onclick="openModal('pending')">＋ 新增任务</button>
+      </div>
+      <div id="pending-list"></div>
+    </section>
+
+    <!-- Page: Treasury -->
+    <section class="page" id="page-treasury">
+      <div class="page-header">
+        <div class="page-title"><span class="bow">🎀</span>小金库</div>
+        <button class="btn-add" onclick="openModal('treasury')">＋ 新增收入</button>
+      </div>
+      <div class="dashboard" id="dashboard"></div>
+      <div class="section-label">📋 收入总档案</div>
+      <div id="treasury-list"></div>
+    </section>
+  </main>
+</div>
+
+<!-- ==================== Modal ==================== -->
+<div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modal-content"></div>
+</div>
+
+<!-- ==================== Toast ==================== -->
+<div class="toast" id="toast"></div>
+
+<!-- ==================== Hidden File Input for Icon Upload ==================== -->
+<input type="file" id="icon-input" accept="image/*" style="display:none" onchange="handleIconUpload(event)">
+
+<!-- ==================== Floating Animal Doodles (SVG) ==================== -->
+<!-- Bunny top-right -->
+<svg class="animal-doodle ad1" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+  <!-- Bunny ears -->
+  <ellipse cx="28" cy="18" rx="6" ry="14" fill="#FFC4D2" stroke="#FF8FA8" stroke-width="1.5"/>
+  <ellipse cx="42" cy="16" rx="6" ry="14" fill="#FFC4D2" stroke="#FF8FA8" stroke-width="1.5"/>
+  <ellipse cx="28" cy="20" rx="3" ry="10" fill="#FFF0F4"/>
+  <ellipse cx="42" cy="18" rx="3" ry="10" fill="#FFF0F4"/>
+  <!-- Head -->
+  <ellipse cx="35" cy="45" rx="20" ry="18" fill="#FFFFFF" stroke="#FF8FA8" stroke-width="2"/>
+  <!-- Cheeks -->
+  <circle cx="24" cy="48" r="5" fill="#FFC4D2" opacity="0.5"/>
+  <circle cx="46" cy="48" r="5" fill="#FFC4D2" opacity="0.5"/>
+  <!-- Eyes -->
+  <circle cx="28" cy="42" r="2.5" fill="#3D5A5C"/>
+  <circle cx="42" cy="42" r="2.5" fill="#3D5A5C"/>
+  <circle cx="29" cy="41" r="0.8" fill="#FFF"/>
+  <circle cx="43" cy="41" r="0.8" fill="#FFF"/>
+  <!-- Nose & mouth -->
+  <ellipse cx="35" cy="48" rx="2.5" ry="1.8" fill="#FF8FA8"/>
+  <path d="M33 51 Q35 53 37 51" fill="none" stroke="#FF8FA8" stroke-width="1.2" stroke-linecap="round"/>
+</svg>
+
+<!-- Bear mid-right -->
+<svg class="animal-doodle ad2" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+  <!-- Ears -->
+  <circle cx="22" cy="24" r="8" fill="#C8A882" stroke="#A08862" stroke-width="1.5"/>
+  <circle cx="48" cy="24" r="8" fill="#C8A882" stroke="#A08862" stroke-width="1.5"/>
+  <circle cx="22" cy="24" r="4.5" fill="#E8D0AC"/>
+  <circle cx="48" cy="24" r="4.5" fill="#E8D0AC"/>
+  <!-- Head -->
+  <ellipse cx="35" cy="42" rx="20" ry="18" fill="#C8A882" stroke="#A08862" stroke-width="2"/>
+  <!-- Muzzle -->
+  <ellipse cx="35" cy="47" rx="10" ry="7" fill="#E8D0AC"/>
+  <!-- Cheeks -->
+  <circle cx="22" cy="44" r="4.5" fill="#FFC4D2" opacity="0.4"/>
+  <circle cx="48" cy="44" r="4.5" fill="#FFC4D2" opacity="0.4"/>
+  <!-- Eyes -->
+  <circle cx="28" cy="38" r="2.5" fill="#3D5A5C"/>
+  <circle cx="42" cy="38" r="2.5" fill="#3D5A5C"/>
+  <circle cx="29" cy="37" r="0.8" fill="#FFF"/>
+  <circle cx="43" cy="37" r="0.8" fill="#FFF"/>
+  <!-- Nose -->
+  <ellipse cx="35" cy="44" rx="2.5" ry="2" fill="#3D5A5C"/>
+  <path d="M35 46 Q33 49 31 48 M35 46 Q37 49 39 48" fill="none" stroke="#3D5A5C" stroke-width="1" stroke-linecap="round"/>
+</svg>
+
+<!-- Chick bottom-right -->
+<svg class="animal-doodle ad3" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+  <!-- Body -->
+  <ellipse cx="40" cy="45" rx="24" ry="22" fill="#FFE9A8" stroke="#E8B94A" stroke-width="2"/>
+  <!-- Tuft on head -->
+  <path d="M36 22 Q38 16 36 14 M40 21 Q40 15 38 13 M44 22 Q42 16 44 14" fill="none" stroke="#E8B94A" stroke-width="2" stroke-linecap="round"/>
+  <!-- Cheeks -->
+  <circle cx="26" cy="42" r="5" fill="#FFC4D2" opacity="0.5"/>
+  <circle cx="54" cy="42" r="5" fill="#FFC4D2" opacity="0.5"/>
+  <!-- Eyes -->
+  <circle cx="32" cy="36" r="3" fill="#3D5A5C"/>
+  <circle cx="48" cy="36" r="3" fill="#3D5A5C"/>
+  <circle cx="33" cy="35" r="1" fill="#FFF"/>
+  <circle cx="49" cy="35" r="1" fill="#FFF"/>
+  <!-- Beak -->
+  <path d="M36 44 L40 48 L44 44 Z" fill="#FF8FA8" stroke="#E06A87" stroke-width="1"/>
+  <!-- Wings -->
+  <ellipse cx="20" cy="50" rx="6" ry="10" fill="#FFD66B" stroke="#E8B94A" stroke-width="1.5" transform="rotate(-20 20 50)"/>
+  <ellipse cx="60" cy="50" rx="6" ry="10" fill="#FFD66B" stroke="#E8B94A" stroke-width="1.5" transform="rotate(20 60 50)"/>
+  <!-- Feet -->
+  <path d="M34 66 L32 70 M34 66 L36 70 M34 66 L34 71" stroke="#E8B94A" stroke-width="2" stroke-linecap="round"/>
+  <path d="M46 66 L44 70 M46 66 L48 70 M46 66 L46 71" stroke="#E8B94A" stroke-width="2" stroke-linecap="round"/>
+</svg>
+
+<!-- Fox small -->
+<svg class="animal-doodle ad4" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+  <!-- Ears -->
+  <path d="M18 28 L14 12 L28 22 Z" fill="#FF9E6B" stroke="#E08050" stroke-width="1.5" stroke-linejoin="round"/>
+  <path d="M52 28 L56 12 L42 22 Z" fill="#FF9E6B" stroke="#E08050" stroke-width="1.5" stroke-linejoin="round"/>
+  <path d="M18 26 L16 16 L25 22 Z" fill="#FFF0E8"/>
+  <path d="M52 26 L54 16 L45 22 Z" fill="#FFF0E8"/>
+  <!-- Head -->
+  <ellipse cx="35" cy="40" rx="20" ry="17" fill="#FF9E6B" stroke="#E08050" stroke-width="2"/>
+  <!-- White face -->
+  <ellipse cx="35" cy="46" rx="13" ry="10" fill="#FFF5F0"/>
+  <!-- Cheeks -->
+  <circle cx="23" cy="42" r="4" fill="#FFC4D2" opacity="0.4"/>
+  <circle cx="47" cy="42" r="4" fill="#FFC4D2" opacity="0.4"/>
+  <!-- Eyes -->
+  <ellipse cx="28" cy="37" rx="2.5" ry="3" fill="#3D5A5C"/>
+  <ellipse cx="42" cy="37" rx="2.5" ry="3" fill="#3D5A5C"/>
+  <circle cx="29" cy="36" r="0.8" fill="#FFF"/>
+  <circle cx="43" cy="36" r="0.8" fill="#FFF"/>
+  <!-- Nose -->
+  <ellipse cx="35" cy="44" rx="2.5" ry="2" fill="#3D5A5C"/>
+  <!-- Smile -->
+  <path d="M31 49 Q35 52 39 49" fill="none" stroke="#3D5A5C" stroke-width="1.2" stroke-linecap="round"/>
+</svg>
+
+<!-- Frog tiny -->
+<svg class="animal-doodle ad5" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+  <!-- Eyes (bumpy on top) -->
+  <circle cx="25" cy="28" r="8" fill="#A0D4DC" stroke="#5DB4C0" stroke-width="1.5"/>
+  <circle cx="45" cy="28" r="8" fill="#A0D4DC" stroke="#5DB4C0" stroke-width="1.5"/>
+  <circle cx="25" cy="28" r="4" fill="#FFF"/>
+  <circle cx="45" cy="28" r="4" fill="#FFF"/>
+  <circle cx="25" cy="29" r="2.5" fill="#3D5A5C"/>
+  <circle cx="45" cy="29" r="2.5" fill="#3D5A5C"/>
+  <circle cx="26" cy="28" r="0.8" fill="#FFF"/>
+  <circle cx="46" cy="28" r="0.8" fill="#FFF"/>
+  <!-- Head/body -->
+  <ellipse cx="35" cy="45" rx="22" ry="18" fill="#A0D4DC" stroke="#5DB4C0" stroke-width="2"/>
+  <!-- Cheeks -->
+  <circle cx="20" cy="46" r="5" fill="#FFC4D2" opacity="0.4"/>
+  <circle cx="50" cy="46" r="5" fill="#FFC4D2" opacity="0.4"/>
+  <!-- Smile -->
+  <path d="M24 47 Q35 56 46 47" fill="none" stroke="#3D5A5C" stroke-width="1.5" stroke-linecap="round"/>
+</svg>
+
+<!-- ==================== Bottom Decoration ==================== -->
+<svg class="kitty-corner" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+  <ellipse cx="36" cy="32" rx="14" ry="11" fill="#5DB4C0"/>
+  <ellipse cx="84" cy="32" rx="14" ry="11" fill="#5DB4C0"/>
+  <ellipse cx="60" cy="68" rx="40" ry="36" fill="#5DB4C0"/>
+  <path d="M34 26 Q22 18 18 28 Q14 38 26 40 Q36 41 34 32 Z" fill="#FF8FA8"/>
+  <path d="M36 26 Q48 18 52 28 Q56 38 44 40 Q34 41 36 32 Z" fill="#FF8FA8"/>
+</svg>
+
+<script>
+// ==================== Safe Area Detection (PWA Fix) ====================
+// iOS PWA standalone 模式下 env(safe-area-inset-*) 可能返回 0
+// 用 JS 探针读取实际值，如果为 0 则根据 PWA 模式硬编码兜底
+(function detectSafeArea() {
+  var probe = document.createElement('div');
+  probe.style.cssText = 'position:fixed;top:0;left:0;width:0;height:0;'
+    + 'padding-top:env(safe-area-inset-top,0px);'
+    + 'padding-bottom:env(safe-area-inset-bottom,0px);'
+    + 'visibility:hidden;pointer-events:none;';
+  document.body.appendChild(probe);
+  var cs = getComputedStyle(probe);
+  var top = parseFloat(cs.paddingTop) || 0;
+  var bottom = parseFloat(cs.paddingBottom) || 0;
+
+  // 检测 PWA standalone 模式
+  var isStandalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches)
+    || (window.navigator && window.navigator.standalone === true);
+
+  if (isStandalone && top === 0) {
+    // PWA 模式下 env() 返回 0，用硬编码兜底
+    // iPhone 15 Pro: Dynamic Island ~59px, Home indicator ~34px
+    // 通用兜底: 取较大值确保不被遮挡
+    top = 59;
+    bottom = 34;
+  }
+  // 浏览器模式下 env() 也可能返回 0，但浏览器有地址栏挡着，给个最小值
+  if (!isStandalone && top === 0) {
+    top = 0;   // 浏览器模式不需要额外偏移，Safari 地址栏已处理
+    bottom = 0;
+  }
+
+  document.documentElement.style.setProperty('--safe-top-px', top + 'px');
+  document.documentElement.style.setProperty('--safe-bottom-px', bottom + 'px');
+  document.body.removeChild(probe);
+})();
+
+// ==================== Month Archive Helpers ====================
+function getMonthKey(dateStr) {
+  if (!dateStr) return '';
+  return dateStr.slice(0, 7);
+}
+function formatMonthLabel(key) {
+  if (!key) return '未分类';
+  const parts = key.split('-');
+  return parts[0] + '年' + parseInt(parts[1]) + '月';
+}
+function getCurrentMonthKey() {
+  const now = new Date();
+  return now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+}
+function getExpandedMonths(section) {
+  try {
+    return JSON.parse(localStorage.getItem('kitty_expanded_' + section)) || [];
+  } catch(e) { return []; }
+}
+function toggleMonthExpanded(section, key) {
+  const arr = getExpandedMonths(section);
+  const idx = arr.indexOf(key);
+  if (idx >= 0) arr.splice(idx, 1); else arr.push(key);
+  localStorage.setItem('kitty_expanded_' + section, JSON.stringify(arr));
+}
+function isMonthExpanded(section, key) {
+  return getExpandedMonths(section).indexOf(key) >= 0;
+}
+
+// ==================== Data Management ====================
+const STORAGE = {
+  accepted: 'kitty_accepted_v1',
+  pending: 'kitty_pending_v1',
+  treasury: 'kitty_treasury_v1',
+  init: 'kitty_init_v1'
+};
+
+function loadData(key) {
+  try { return JSON.parse(localStorage.getItem(key)) || []; }
+  catch(e) { return []; }
+}
+function saveData(key, data) {
+  localStorage.setItem(key, JSON.stringify(data));
+}
+
+function genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+
+// ==================== Initialize Preset Data ====================
+function initializeData() {
+  if (localStorage.getItem(STORAGE.init)) return;
+
+  const presetAccepted = [
+    {
+      id: genId(),
+      brand: '完美日记', product: '小细跟口红',
+      publishFormat: '小红书图文', contact: '王经理 138xxxx1234',
+      requirements: '3张图+200字文案，突出产品质感与上嘴效果',
+      collection: '夏季彩妆合集',
+      needsAdvance: false, advancePlatform: '', refunded: false,
+      waterType: 'above',
+      hasPayment: true, paymentAmount: 800,
+      deadline: '2026-08-05', completed: false
+    },
+    {
+      id: genId(),
+      brand: '花西子', product: '同心锁口红',
+      publishFormat: '抖音短视频', contact: '李总监 139xxxx5678',
+      requirements: '30秒短视频，展示开箱+上妆过程，需挂车',
+      collection: '夏季彩妆合集',
+      needsAdvance: true, advancePlatform: '蚂蚁垫付', refunded: false,
+      waterType: 'above',
+      hasPayment: true, paymentAmount: 1500,
+      deadline: '2026-08-08', completed: false
+    },
+    {
+      id: genId(),
+      brand: '雅诗兰黛', product: '小棕瓶精华',
+      publishFormat: '小红书图文', contact: '陈经理 137xxxx9012',
+      requirements: '对比使用前后皮肤状态，5张图+视频',
+      needsAdvance: false, advancePlatform: '', refunded: false,
+      waterType: 'above',
+      hasPayment: true, paymentAmount: 2000,
+      deadline: '2026-07-15', completed: true
+    },
+    {
+      id: genId(),
+      brand: '兰蔻', product: '菁纯面霜',
+      publishFormat: '抖音视频', contact: '赵总监 136xxxx3456',
+      requirements: '开箱+质地展示+使用感受',
+      needsAdvance: false, advancePlatform: '', refunded: false,
+      waterType: 'below',
+      hasPayment: true, paymentAmount: 1800,
+      deadline: '2026-07-22', completed: true
+    }
+  ];
+
+  const presetPending = [
+    { id: genId(), brand: '橘朵', product: '单色眼影盘', contactTime: '2026-08-03', completed: false },
+    { id: genId(), brand: 'colorkey', product: '空气唇釉', contactTime: '2026-08-06', completed: false },
+    { id: genId(), brand: '酵色', product: '琥珀眼影盘', contactTime: '2026-08-10', completed: false }
+  ];
+
+  saveData(STORAGE.accepted, presetAccepted);
+  saveData(STORAGE.pending, presetPending);
+  saveData(STORAGE.treasury, []);
+  localStorage.setItem(STORAGE.init, '1');
+}
+
+// ==================== SVG Animal for Empty States ====================
+const animalSVGs = {
+  bunny: `<svg class="empty-animal" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="28" cy="18" rx="6" ry="14" fill="#FFC4D2" stroke="#FF8FA8" stroke-width="1.5"/>
+    <ellipse cx="42" cy="16" rx="6" ry="14" fill="#FFC4D2" stroke="#FF8FA8" stroke-width="1.5"/>
+    <ellipse cx="28" cy="20" rx="3" ry="10" fill="#FFF0F4"/>
+    <ellipse cx="42" cy="18" rx="3" ry="10" fill="#FFF0F4"/>
+    <ellipse cx="35" cy="45" rx="20" ry="18" fill="#FFFFFF" stroke="#FF8FA8" stroke-width="2"/>
+    <circle cx="24" cy="48" r="5" fill="#FFC4D2" opacity="0.5"/>
+    <circle cx="46" cy="48" r="5" fill="#FFC4D2" opacity="0.5"/>
+    <circle cx="28" cy="42" r="2.5" fill="#3D5A5C"/>
+    <circle cx="42" cy="42" r="2.5" fill="#3D5A5C"/>
+    <circle cx="29" cy="41" r="0.8" fill="#FFF"/>
+    <circle cx="43" cy="41" r="0.8" fill="#FFF"/>
+    <ellipse cx="35" cy="48" rx="2.5" ry="1.8" fill="#FF8FA8"/>
+    <path d="M33 51 Q35 53 37 51" fill="none" stroke="#FF8FA8" stroke-width="1.2" stroke-linecap="round"/>
+  </svg>`,
+  bear: `<svg class="empty-animal" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="22" cy="24" r="8" fill="#C8A882" stroke="#A08862" stroke-width="1.5"/>
+    <circle cx="48" cy="24" r="8" fill="#C8A882" stroke="#A08862" stroke-width="1.5"/>
+    <circle cx="22" cy="24" r="4.5" fill="#E8D0AC"/>
+    <circle cx="48" cy="24" r="4.5" fill="#E8D0AC"/>
+    <ellipse cx="35" cy="42" rx="20" ry="18" fill="#C8A882" stroke="#A08862" stroke-width="2"/>
+    <ellipse cx="35" cy="47" rx="10" ry="7" fill="#E8D0AC"/>
+    <circle cx="22" cy="44" r="4.5" fill="#FFC4D2" opacity="0.4"/>
+    <circle cx="48" cy="44" r="4.5" fill="#FFC4D2" opacity="0.4"/>
+    <circle cx="28" cy="38" r="2.5" fill="#3D5A5C"/>
+    <circle cx="42" cy="38" r="2.5" fill="#3D5A5C"/>
+    <ellipse cx="35" cy="44" rx="2.5" ry="2" fill="#3D5A5C"/>
+    <path d="M35 46 Q33 49 31 48 M35 46 Q37 49 39 48" fill="none" stroke="#3D5A5C" stroke-width="1" stroke-linecap="round"/>
+  </svg>`,
+  chick: `<svg class="empty-animal" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="40" cy="45" rx="24" ry="22" fill="#FFE9A8" stroke="#E8B94A" stroke-width="2"/>
+    <path d="M36 22 Q38 16 36 14 M40 21 Q40 15 38 13 M44 22 Q42 16 44 14" fill="none" stroke="#E8B94A" stroke-width="2" stroke-linecap="round"/>
+    <circle cx="26" cy="42" r="5" fill="#FFC4D2" opacity="0.5"/>
+    <circle cx="54" cy="42" r="5" fill="#FFC4D2" opacity="0.5"/>
+    <circle cx="32" cy="36" r="3" fill="#3D5A5C"/>
+    <circle cx="48" cy="36" r="3" fill="#3D5A5C"/>
+    <circle cx="33" cy="35" r="1" fill="#FFF"/>
+    <circle cx="49" cy="35" r="1" fill="#FFF"/>
+    <path d="M36 44 L40 48 L44 44 Z" fill="#FF8FA8" stroke="#E06A87" stroke-width="1"/>
+    <ellipse cx="20" cy="50" rx="6" ry="10" fill="#FFD66B" stroke="#E8B94A" stroke-width="1.5" transform="rotate(-20 20 50)"/>
+    <ellipse cx="60" cy="50" rx="6" ry="10" fill="#FFD66B" stroke="#E8B94A" stroke-width="1.5" transform="rotate(20 60 50)"/>
+  </svg>`
+};
+
+// ==================== Navigation ====================
+function switchPage(page) {
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.toggle('active', el.dataset.page === page));
+  document.querySelectorAll('.page').forEach(el => el.classList.toggle('active', el.id === 'page-' + page));
+  const mc = document.querySelector('.main-content');
+  mc.scrollTop = 0;
+  if (page === 'accepted') renderAccepted();
+  else if (page === 'pending') renderPending();
+  else if (page === 'treasury') renderTreasury();
+}
+
+// ==================== Render: Accepted Tasks ====================
+function renderAccepted() {
+  const list = document.getElementById('accepted-list');
+  let tasks = loadData(STORAGE.accepted);
+
+  const total = tasks.length;
+  const completedCount = tasks.filter(t => t.completed).length;
+  const pendingCount = total - completedCount;
+
+  if (total === 0) {
+    list.innerHTML = emptyState(animalSVGs.bunny, '还没有已接任务哦~', '点击右上角添加第一个任务吧');
+    return;
+  }
+
+  const renderCard = t => {
+    const today = new Date().toISOString().slice(0,10);
+    const isUrgent = !t.completed && t.deadline && t.deadline <= today;
+    return `
+    <div class="task-card ${t.completed ? 'completed' : ''}" data-task-id="${t.id}" onclick="toggleExpand('${t.id}')">
+      <div class="task-card-top">
+        <div class="task-checkbox ${t.completed ? 'checked' : ''}" onclick="event.stopPropagation();toggleAccepted('${t.id}');"></div>
+        <div class="task-title-area">
+          <div class="task-title">${esc(t.brand)} · ${esc(t.product)}</div>
+          <div class="task-deadline ${isUrgent ? 'urgent' : ''}">📅 截止: ${esc(t.deadline || '未设置')}${isUrgent ? ' ⚠️' : ''}</div>
+        </div>
+        <button class="btn-edit" onclick="event.stopPropagation();editAccepted('${t.id}');">✎</button>
+        <button class="btn-delete" onclick="event.stopPropagation();deleteAccepted('${t.id}');">✕</button>
+      </div>
+      <div class="task-card-meta">
+        <span class="publish-format">${esc(t.publishFormat || '未填写发布形式')}</span>
+      </div>
+      <div class="task-details">
+        <div class="task-detail-row"><span class="task-detail-label">水上/水下</span><span class="task-detail-value">${t.waterType === 'below' ? '💧 水下（私下/未公开）' : '🌊 水上（官方/公开）'}</span></div>
+        <div class="task-detail-row"><span class="task-detail-label">联系方式</span><span class="task-detail-value">${esc(t.contact || '-')}</span></div>
+        <div class="task-detail-row"><span class="task-detail-label">任务要求</span><span class="task-detail-value">${esc(t.requirements || '-')}</span></div>
+      </div>
+      <div class="task-tags">
+        ${t.needsAdvance ? `<span class="tag tag-advance">垫款 · ${esc(t.advancePlatform || '是')}</span><span class="tag ${t.refunded ? 'tag-refunded' : 'tag-unrefunded'}">${t.refunded ? '✓ 已返款' : '⚠ 未返款'}</span>` : ''}
+        ${t.hasPayment ? `<span class="tag tag-payment">收入 ¥${esc(t.paymentAmount || 0)}</span>` : ''}
+      </div>
+      <div class="expand-toggle">点击查看详情 <span class="arrow">▼</span></div>
+    </div>`;
+  };
+
+  // 按合集分组（在月内）
+  const renderMonthContent = (monthTasks) => {
+    const groups = new Map();
+    const standalone = [];
+    monthTasks.forEach(t => {
+      if (t.collection && t.collection.trim()) {
+        const key = t.collection.trim();
+        if (!groups.has(key)) groups.set(key, []);
+        groups.get(key).push(t);
+      } else {
+        standalone.push(t);
+      }
+    });
+
+    const earliestDeadline = items => {
+      const ds = items.filter(x => x.deadline).map(x => x.deadline).sort();
+      return ds[0] || '9999';
+    };
+    for (const items of groups.values()) {
+      items.sort((a, b) => (a.deadline || '9999').localeCompare(b.deadline || '9999'));
+    }
+    // 独立任务：未完成在前按 deadline 升序，已完成且无未返款垫款的沉底
+    const shouldSink = t => t.completed && !(t.needsAdvance && !t.refunded);
+    standalone.sort((a, b) => {
+      const aSink = shouldSink(a), bSink = shouldSink(b);
+      if (aSink !== bSink) return aSink ? 1 : -1;
+      return (a.deadline || '9999').localeCompare(b.deadline || '9999');
+    });
+    // 合集组：全部完成且无未返款垫款的组沉底，否则按组内最早 deadline 升序
+    const sortedGroups = [...groups.entries()].sort((a, b) => {
+      const aAllDone = a[1].every(x => shouldSink(x));
+      const bAllDone = b[1].every(x => shouldSink(x));
+      if (aAllDone !== bAllDone) return aAllDone ? 1 : -1;
+      return earliestDeadline(a[1]).localeCompare(earliestDeadline(b[1]));
+    });
+
+    let h = '';
+    for (const [name, items] of sortedGroups) {
+      const totalFee = items.reduce((s, x) => s + (x.hasPayment ? (parseFloat(x.paymentAmount) || 0) : 0), 0);
+      const edl = earliestDeadline(items);
+      const doneCount = items.filter(x => x.completed).length;
+      const allDone = doneCount === items.length;
+      h += `
+        <div class="collection-group ${allDone ? 'completed' : ''}">
+          <div class="collection-header">
+            <span class="collection-icon">✦</span>
+            <span class="collection-name">${esc(name)}</span>
+            <span class="collection-count">${doneCount}/${items.length}</span>
+            <span class="collection-fee">¥${totalFee}</span>
+          </div>
+          <div class="collection-deadline">截止：${edl === '9999' ? '未设置' : esc(edl)}</div>
+          <div class="collection-cards">${items.map(renderCard).join('')}</div>
+        </div>`;
+    }
+    h += standalone.map(renderCard).join('');
+    return h;
+  };
+
+  // 按月分组
+  const currentMonth = getCurrentMonthKey();
+  const monthMap = new Map();
+  tasks.forEach(t => {
+    const k = getMonthKey(t.deadline);
+    const finalKey = k || 'no-date';
+    if (!monthMap.has(finalKey)) monthMap.set(finalKey, []);
+    monthMap.get(finalKey).push(t);
+  });
+  // 排序：当前月在最前，其他按月份倒序
+  const sortedKeys = [...monthMap.keys()].sort((a, b) => {
+    if (a === currentMonth) return -1;
+    if (b === currentMonth) return 1;
+    if (a === 'no-date') return 1;
+    if (b === 'no-date') return -1;
+    return b.localeCompare(a);
+  });
+
+  let html = '';
+
+  // 顶部统计栏（全局统计）
+  html += `
+    <div class="accepted-stats">
+      <div class="stat-item"><span class="stat-num">${total}</span><span class="stat-label">总任务</span></div>
+      <div class="stat-divider"></div>
+      <div class="stat-item done"><span class="stat-num">${completedCount}</span><span class="stat-label">已完成</span></div>
+      <div class="stat-divider"></div>
+      <div class="stat-item pending"><span class="stat-num">${pendingCount}</span><span class="stat-label">未完成</span></div>
+    </div>`;
+
+  // 渲染月份组
+  for (const key of sortedKeys) {
+    const monthTasks = monthMap.get(key);
+    const isCurrent = key === currentMonth;
+    const expanded = isCurrent || isMonthExpanded('accepted', key);
+    const monthFee = monthTasks.reduce((s, x) => s + (x.hasPayment ? (parseFloat(x.paymentAmount) || 0) : 0), 0);
+    const monthDone = monthTasks.filter(x => x.completed).length;
+    const label = isCurrent ? '本月 · ' + formatMonthLabel(key) : formatMonthLabel(key);
+
+    html += `
+      <div class="month-group ${isCurrent ? 'current' : ''} ${expanded ? 'expanded' : 'collapsed'}">
+        <div class="month-header" onclick="toggleMonthSection('accepted', '${key}')">
+          <span class="month-icon">${isCurrent ? '🌟' : '📅'}</span>
+          <span class="month-label">${esc(label)}</span>
+          <span class="month-summary">${monthTasks.length}个任务 · ¥${monthFee}${monthDone > 0 ? ' · 完成' + monthDone : ''}</span>
+          <span class="month-arrow">▼</span>
+        </div>
+        <div class="month-content">
+          ${expanded ? renderMonthContent(monthTasks) : ''}
+        </div>
+      </div>`;
+  }
+
+  list.innerHTML = html;
+}
+
+function toggleMonthSection(section, key) {
+  toggleMonthExpanded(section, key);
+  if (section === 'accepted') renderAccepted();
+  else if (section === 'pending') renderPending();
+  else if (section === 'treasury') renderTreasury();
+}
+
+function toggleExpand(id) {
+  document.querySelectorAll('.task-card').forEach(c => {
+    if (c.dataset.taskId === id) c.classList.toggle('expanded');
+  });
+}
+
+function toggleAccepted(id) {
+  let tasks = loadData(STORAGE.accepted);
+  const t = tasks.find(x => x.id === id);
+  if (t) { t.completed = !t.completed; saveData(STORAGE.accepted, tasks); renderAccepted(); toast(t.completed ? '已标记完成~' : '已取消完成'); }
+}
+function cycleReportStatus(id) {
+  let tasks = loadData(STORAGE.accepted);
+  const t = tasks.find(x => x.id === id);
+  if (t) {
+    const cur = t.reportStatus || 0;
+    t.reportStatus = (cur + 1) % 3;
+    saveData(STORAGE.accepted, tasks);
+    renderAccepted();
+    const labels = ['已标记为未报备', '已标记为已报备', '已标记为已接单'];
+    toast(labels[t.reportStatus] + '~');
+  }
+}
+function deleteAccepted(id) {
+  let tasks = loadData(STORAGE.accepted);
+  tasks = tasks.filter(x => x.id !== id);
+  saveData(STORAGE.accepted, tasks);
+  renderAccepted();
+  toast('已删除~');
+}
+
+// ==================== Render: Pending Tasks ====================
+function renderPending() {
+  const list = document.getElementById('pending-list');
+  let tasks = loadData(STORAGE.pending);
+
+  if (tasks.length === 0) {
+    list.innerHTML = emptyState(animalSVGs.chick, '还没有未接任务哦~', '点击右上角添加新任务吧');
+    return;
+  }
+
+  // 按月分组
+  const currentMonth = getCurrentMonthKey();
+  const monthMap = new Map();
+  tasks.forEach(t => {
+    const k = getMonthKey(t.contactTime);
+    const finalKey = k || 'no-date';
+    if (!monthMap.has(finalKey)) monthMap.set(finalKey, []);
+    monthMap.get(finalKey).push(t);
+  });
+  const sortedKeys = [...monthMap.keys()].sort((a, b) => {
+    if (a === currentMonth) return -1;
+    if (b === currentMonth) return 1;
+    if (a === 'no-date') return 1;
+    if (b === 'no-date') return -1;
+    return b.localeCompare(a);
+  });
+
+  const renderCard = t => {
+    return `
+    <div class="pending-card ${t.completed ? 'completed' : ''}" onclick="editPending('${t.id}')">
+      <div class="task-checkbox ${t.completed ? 'checked' : ''}" onclick="event.stopPropagation();togglePending('${t.id}')"></div>
+      <div class="pending-info">
+        <div class="pending-info-name">${esc(t.brand)} · ${esc(t.product)}</div>
+        <div class="pending-info-row">对接时间： <span>${esc(t.contactTime || '-')}</span></div>
+      </div>
+      <button class="btn-edit" onclick="event.stopPropagation();editPending('${t.id}')">✎</button>
+      <button class="btn-delete" onclick="event.stopPropagation();deletePending('${t.id}')">✕</button>
+    </div>`;
+  };
+
+  let html = '';
+  for (const key of sortedKeys) {
+    const monthTasks = monthMap.get(key);
+    // 月内排序
+    monthTasks.sort((a, b) => {
+      if (a.completed !== b.completed) return a.completed ? 1 : -1;
+      return (a.contactTime || '9999').localeCompare(b.contactTime || '9999');
+    });
+    const isCurrent = key === currentMonth;
+    const expanded = isCurrent || isMonthExpanded('pending', key);
+    const label = isCurrent ? '本月 · ' + formatMonthLabel(key) : formatMonthLabel(key);
+    const doneCount = monthTasks.filter(x => x.completed).length;
+
+    html += `
+      <div class="month-group ${isCurrent ? 'current' : ''} ${expanded ? 'expanded' : 'collapsed'}">
+        <div class="month-header" onclick="toggleMonthSection('pending', '${key}')">
+          <span class="month-icon">${isCurrent ? '🌟' : '📅'}</span>
+          <span class="month-label">${esc(label)}</span>
+          <span class="month-summary">${monthTasks.length}个任务${doneCount > 0 ? ' · 完成' + doneCount : ''}</span>
+          <span class="month-arrow">▼</span>
+        </div>
+        <div class="month-content">
+          ${expanded ? monthTasks.map(renderCard).join('') : ''}
+        </div>
+      </div>`;
+  }
+
+  list.innerHTML = html;
+}
+
+function togglePending(id) {
+  let tasks = loadData(STORAGE.pending);
+  const t = tasks.find(x => x.id === id);
+  if (t) { t.completed = !t.completed; saveData(STORAGE.pending, tasks); renderPending(); toast(t.completed ? '已标记完成~' : '已取消完成'); }
+}
+function deletePending(id) {
+  let tasks = loadData(STORAGE.pending);
+  tasks = tasks.filter(x => x.id !== id);
+  saveData(STORAGE.pending, tasks);
+  renderPending();
+  toast('已删除~');
+}
+
+// ==================== Render: Treasury ====================
+function renderTreasury() {
+  const entries = loadData(STORAGE.treasury);
+  let aboveWater = 0, belowWater = 0, unreceivedTotal = 0;
+  entries.forEach(e => {
+    const amt = parseFloat(e.amount) || 0;
+    if (e.received) {
+      if (e.type === 'above') aboveWater += amt;
+      else belowWater += amt;
+    } else {
+      unreceivedTotal += amt;
+    }
+  });
+  const total = aboveWater + belowWater;
+
+  document.getElementById('dashboard').innerHTML = `
+    <div class="dash-card water-above">
+      <div class="dash-icon">🌊</div>
+      <div class="dash-label">水上收入（已收）</div>
+      <div class="dash-value">¥${fmt(aboveWater)}</div>
+    </div>
+    <div class="dash-card water-below">
+      <div class="dash-icon">💧</div>
+      <div class="dash-label">水下收入（已收）</div>
+      <div class="dash-value">¥${fmt(belowWater)}</div>
+    </div>
+    <div class="dash-card total">
+      <div class="dash-icon">💗</div>
+      <div class="dash-label">已收入总金额</div>
+      <div class="dash-value">¥${fmt(total)}</div>
+    </div>
+    ${unreceivedTotal > 0 ? `<div class="unreceived-note">⏳ 待收入 ¥${fmt(unreceivedTotal)}（未收入不计入统计）</div>` : ''}
+  `;
+
+  const list = document.getElementById('treasury-list');
+  if (entries.length === 0) {
+    list.innerHTML = emptyState(animalSVGs.bear, '小金库还是空的~', '点击右上角记录第一笔收入吧');
+    return;
+  }
+
+  // 按月分组（基于 createdAt）
+  const currentMonth = getCurrentMonthKey();
+  const monthMap = new Map();
+  entries.forEach(e => {
+    const k = getMonthKey(e.createdAt);
+    const finalKey = k || 'no-date';
+    if (!monthMap.has(finalKey)) monthMap.set(finalKey, []);
+    monthMap.get(finalKey).push(e);
+  });
+  const sortedKeys = [...monthMap.keys()].sort((a, b) => {
+    if (a === currentMonth) return -1;
+    if (b === currentMonth) return 1;
+    if (a === 'no-date') return 1;
+    if (b === 'no-date') return -1;
+    return b.localeCompare(a);
+  });
+
+  let html = '';
+  for (const key of sortedKeys) {
+    const monthEntries = monthMap.get(key);
+    // 月内按 createdAt 倒序
+    monthEntries.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+    const isCurrent = key === currentMonth;
+    const expanded = isCurrent || isMonthExpanded('treasury', key);
+    const monthTotal = monthEntries.reduce((s, x) => s + (x.received ? (parseFloat(x.amount) || 0) : 0), 0);
+    const receivedCount = monthEntries.filter(x => x.received).length;
+    const label = isCurrent ? '本月 · ' + formatMonthLabel(key) : formatMonthLabel(key);
+
+    html += `
+      <div class="month-group ${isCurrent ? 'current' : ''} ${expanded ? 'expanded' : 'collapsed'}">
+        <div class="month-header" onclick="toggleMonthSection('treasury', '${key}')">
+          <span class="month-icon">${isCurrent ? '🌟' : '💰'}</span>
+          <span class="month-label">${esc(label)}</span>
+          <span class="month-summary">${monthEntries.length}笔 · 已收¥${monthTotal}${receivedCount > 0 ? ' · ' + receivedCount + '笔已收' : ''}</span>
+          <span class="month-arrow">▼</span>
+        </div>
+        <div class="month-content">
+          ${expanded ? monthEntries.map(e => `
+            <div class="treasury-card" onclick="editTreasury('${e.id}')">
+              <div class="treasury-info">
+                <div class="treasury-name">${esc(e.brandProduct)}</div>
+                <div class="treasury-meta">
+                  ${e.linkedTaskId ? `<span class="tag" style="background:#F0F5F6;color:var(--sky-deep);border:1.5px dashed var(--sky-soft);">🔗 来自任务</span>` : ''}
+                  <span class="tag" style="background:${e.type==='above'?'var(--sky-pale)':'var(--cream-soft)'};color:${e.type==='above'?'var(--sky-deep)':'var(--bark)'};border:1.5px dashed ${e.type==='above'?'var(--sky)':'var(--cream-deep)'};">
+                    ${e.type==='above'?'🌊 水上':'💧 水下'}
+                  </span>
+                  ${e.needsRebate ? `<span class="tag tag-advance">返点 ¥${esc(e.rebateAmount||0)}</span>` : ''}
+                  <span class="tag" style="background:${e.received?'var(--sky-pale)':'var(--cream-soft)'};color:${e.received?'var(--sky-deep)':'var(--cream-deep)'};border:1.5px dashed ${e.received?'var(--sky)':'var(--cream)'};">
+                    ${e.received?'✓ 已收入':'⏳ 未收入'}
+                  </span>
+                </div>
+              </div>
+              <div class="treasury-amount ${e.received?'received':'unreceived'}">¥${fmt(e.amount)}</div>
+              <button class="btn-edit" onclick="event.stopPropagation();editTreasury('${e.id}')">✎</button>
+              <button class="btn-delete" onclick="event.stopPropagation();deleteTreasury('${e.id}')">✕</button>
+            </div>
+          `).join('') : ''}
+        </div>
+      </div>`;
+  }
+
+  list.innerHTML = html;
+}
+
+function deleteTreasury(id) {
+  let entries = loadData(STORAGE.treasury);
+  entries = entries.filter(x => x.id !== id);
+  saveData(STORAGE.treasury, entries);
+  renderTreasury();
+  toast('已删除~');
+}
+
+// ==================== Modal Forms ====================
+let editMode = null;
+
+function openModal(type) {
+  editMode = null;
+  const overlay = document.getElementById('modal-overlay');
+  const content = document.getElementById('modal-content');
+
+  if (type === 'accepted') {
+    content.innerHTML = acceptedFormHTML();
+  } else if (type === 'pending') {
+    content.innerHTML = pendingFormHTML();
+  } else if (type === 'treasury') {
+    content.innerHTML = treasuryFormHTML();
+  }
+
+  overlay.classList.add('show');
+  attachToggles(overlay);
+}
+
+function editAccepted(id) {
+  const tasks = loadData(STORAGE.accepted);
+  const t = tasks.find(x => x.id === id);
+  if (!t) return;
+  editMode = { type: 'accepted', id };
+  const overlay = document.getElementById('modal-overlay');
+  const content = document.getElementById('modal-content');
+  content.innerHTML = acceptedFormHTML(t);
+  overlay.classList.add('show');
+  attachToggles(overlay);
+}
+
+function editPending(id) {
+  const tasks = loadData(STORAGE.pending);
+  const t = tasks.find(x => x.id === id);
+  if (!t) return;
+  editMode = { type: 'pending', id };
+  const overlay = document.getElementById('modal-overlay');
+  const content = document.getElementById('modal-content');
+  content.innerHTML = pendingFormHTML(t);
+  overlay.classList.add('show');
+  attachToggles(overlay);
+}
+
+function editTreasury(id) {
+  const entries = loadData(STORAGE.treasury);
+  const e = entries.find(x => x.id === id);
+  if (!e) return;
+  editMode = { type: 'treasury', id };
+  const overlay = document.getElementById('modal-overlay');
+  const content = document.getElementById('modal-content');
+  content.innerHTML = treasuryFormHTML(e);
+  overlay.classList.add('show');
+  attachToggles(overlay);
+}
+
+function attachToggles(overlay) {
+  overlay.querySelectorAll('.toggle').forEach(t => {
+    t.addEventListener('click', () => {
+      t.classList.toggle('on');
+      const target = t.dataset.target;
+      if (target) {
+        const field = overlay.querySelector(`[data-conditional="${target}"]`);
+        if (field) field.classList.toggle('show', t.classList.contains('on'));
+        // 联级：关闭"垫款"时自动关闭"返款"
+        if (target === 'advance' && !t.classList.contains('on')) {
+          const refundToggle = overlay.querySelector('.toggle[data-target="refund"]');
+          if (refundToggle) {
+            refundToggle.classList.remove('on');
+          }
+        }
+      }
+    });
+  });
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('show');
+  editMode = null;
+}
+
+function acceptedFormHTML(d) {
+  d = d || {};
+  const isEdit = !!d.id;
+  return `
+  <div class="modal-header">
+    <div class="modal-title">${isEdit ? '编辑已接任务' : '新增已接任务'}</div>
+    <button class="modal-close" onclick="closeModal()">✕</button>
+  </div>
+  <div class="form-group">
+    <label class="form-label">品牌方 <span class="req">*</span></label>
+    <input class="form-input" id="f-brand" placeholder="如：完美日记" value="${escAttr(d.brand)}">
+  </div>
+  <div class="form-group">
+    <label class="form-label">产品 <span class="req">*</span></label>
+    <input class="form-input" id="f-product" placeholder="如：小细跟口红" value="${escAttr(d.product)}">
+  </div>
+  <div class="form-row">
+    <div class="form-group">
+      <label class="form-label">发布形式</label>
+      <input class="form-input" id="f-format" placeholder="小红书图文/抖音视频" value="${escAttr(d.publishFormat)}">
+    </div>
+    <div class="form-group">
+      <label class="form-label">发布截止日期 <span class="req">*</span></label>
+      <input class="form-input" id="f-deadline" type="date" value="${escAttr(d.deadline)}">
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="form-label">联系方式</label>
+    <input class="form-input" id="f-contact" placeholder="如：王经理 138xxxx1234" value="${escAttr(d.contact)}">
+  </div>
+  <div class="form-group">
+    <label class="form-label">任务要求</label>
+    <textarea class="form-textarea" id="f-requirements" placeholder="描述具体任务要求...">${esc(d.requirements)}</textarea>
+  </div>
+  <div class="form-group">
+    <label class="form-label">合集名称 <span class="hint">（选填，可用于合并同一合集的任务）</span></label>
+    <input class="form-input" id="f-collection" placeholder="如：完美日记夏季合集（留空表示独立任务）" value="${escAttr(d.collection)}">
+  </div>
+  <div class="toggle-row">
+    <span class="toggle-label">是否需要垫款</span>
+    <div class="toggle ${d.needsAdvance ? 'on' : ''}" data-target="advance"></div>
+  </div>
+  <div class="conditional-field ${d.needsAdvance ? 'show' : ''}" data-conditional="advance">
+    <div class="form-group">
+      <label class="form-label">垫款平台</label>
+      <input class="form-input" id="f-advance-platform" placeholder="如：蚂蚁垫付" value="${escAttr(d.advancePlatform)}">
+    </div>
+    <div class="toggle-row sub">
+      <span class="toggle-label">↳ 是否已返款</span>
+      <div class="toggle ${d.refunded ? 'on' : ''}" data-target="refund"></div>
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="form-label">水上 / 水下</label>
+    <select class="form-select" id="f-water-type">
+      <option value="above" ${(d.waterType||'above')==='above'?'selected':''}>🌊 水上（官方/公开收入）</option>
+      <option value="below" ${d.waterType==='below'?'selected':''}>💧 水下（私下/未公开收入）</option>
+    </select>
+  </div>
+  <div class="toggle-row">
+    <span class="toggle-label">收入稿费</span>
+    <div class="toggle ${d.hasPayment !== false ? 'on' : ''}" data-target="payment"></div>
+  </div>
+  <div class="conditional-field ${d.hasPayment !== false ? 'show' : ''}" data-conditional="payment">
+    <div class="form-group">
+      <label class="form-label">稿费数额 (元)</label>
+      <input class="form-input" id="f-payment-amount" type="number" placeholder="如：800" value="${d.paymentAmount != null ? d.paymentAmount : ''}">
+    </div>
+    <div class="form-hint" style="margin-top:6px;">开启后将自动同步到小金库，可在小金库中修改</div>
+  </div>
+  <div class="form-actions">
+    <button class="btn-cancel" onclick="closeModal()">取消</button>
+    <button class="btn-confirm" onclick="submitAccepted()">${isEdit ? '保存修改' : '确认添加'}</button>
+  </div>`;
+}
+
+function pendingFormHTML(d) {
+  d = d || {};
+  const isEdit = !!d.id;
+  return `
+  <div class="modal-header">
+    <div class="modal-title">${isEdit ? '编辑未接任务' : '新增未接任务'}</div>
+    <button class="modal-close" onclick="closeModal()">✕</button>
+  </div>
+  <div class="form-group">
+    <label class="form-label">品牌 <span class="req">*</span></label>
+    <input class="form-input" id="p-brand" placeholder="如：橘朵" value="${escAttr(d.brand)}">
+  </div>
+  <div class="form-group">
+    <label class="form-label">产品 <span class="req">*</span></label>
+    <input class="form-input" id="p-product" placeholder="如：单色眼影盘" value="${escAttr(d.product)}">
+  </div>
+  <div class="form-group">
+    <label class="form-label">对接时间 <span class="req">*</span></label>
+    <input class="form-input" id="p-contact-time" type="date" value="${escAttr(d.contactTime)}">
+  </div>
+  <div class="form-actions">
+    <button class="btn-cancel" onclick="closeModal()">取消</button>
+    <button class="btn-confirm" onclick="submitPending()">${isEdit ? '保存修改' : '确认添加'}</button>
+  </div>`;
+}
+
+function treasuryFormHTML(d) {
+  d = d || {};
+  const isEdit = !!d.id;
+  return `
+  <div class="modal-header">
+    <div class="modal-title">${isEdit ? '编辑收入记录' : '新增收入记录'}</div>
+    <button class="modal-close" onclick="closeModal()">✕</button>
+  </div>
+  <div class="form-group">
+    <label class="form-label">品牌方及产品 <span class="req">*</span></label>
+    <input class="form-input" id="t-brand-product" placeholder="如：完美日记 - 小细跟口红" value="${escAttr(d.brandProduct)}">
+  </div>
+  <div class="form-group">
+    <label class="form-label">金额 (元) <span class="req">*</span></label>
+    <input class="form-input" id="t-amount" type="number" placeholder="如：800" value="${d.amount != null ? d.amount : ''}">
+  </div>
+  <div class="form-group">
+    <label class="form-label">水上 / 水下 <span class="req">*</span></label>
+    <select class="form-select" id="t-type">
+      <option value="above" ${d.type==='above'?'selected':''}>🌊 水上（官方/公开收入）</option>
+      <option value="below" ${d.type==='below'?'selected':''}>💧 水下（私下/未公开收入）</option>
+    </select>
+  </div>
+  <div class="toggle-row">
+    <span class="toggle-label">是否需要返点</span>
+    <div class="toggle ${d.needsRebate ? 'on' : ''}" data-target="rebate"></div>
+  </div>
+  <div class="conditional-field ${d.needsRebate ? 'show' : ''}" data-conditional="rebate">
+    <div class="form-group">
+      <label class="form-label">返点数额 (元)</label>
+      <input class="form-input" id="t-rebate-amount" type="number" placeholder="如：50" value="${d.rebateAmount != null ? d.rebateAmount : ''}">
+    </div>
+  </div>
+  <div class="toggle-row">
+    <span class="toggle-label">是否已收入</span>
+    <div class="toggle ${d.received ? 'on' : ''}" data-target="received"></div>
+  </div>
+  <div class="form-actions">
+    <button class="btn-cancel" onclick="closeModal()">取消</button>
+    <button class="btn-confirm" onclick="submitTreasury()">${isEdit ? '保存修改' : '确认添加'}</button>
+  </div>`;
+}
+
+// ==================== Form Submissions ====================
+function submitAccepted() {
+  const brand = val('f-brand');
+  const product = val('f-product');
+  if (!brand || !product) { toast('请填写品牌方和产品~'); return; }
+
+  const needsAdvance = hasToggle('advance');
+  const hasPayment = hasToggle('payment');
+  const refunded = needsAdvance && hasToggle('refund');
+
+  const taskData = {
+    brand, product,
+    publishFormat: val('f-format'),
+    deadline: val('f-deadline'),
+    contact: val('f-contact'),
+    requirements: val('f-requirements'),
+    collection: val('f-collection').trim(),
+    needsAdvance,
+    advancePlatform: needsAdvance ? val('f-advance-platform') : '',
+    refunded,
+    waterType: val('f-water-type') || 'above',
+    hasPayment,
+    paymentAmount: hasPayment ? (parseFloat(val('f-payment-amount')) || 0) : 0
+  };
+
+  if (editMode && editMode.type === 'accepted') {
+    let tasks = loadData(STORAGE.accepted);
+    const idx = tasks.findIndex(x => x.id === editMode.id);
+    if (idx >= 0) {
+      tasks[idx] = { ...tasks[idx], ...taskData };
+      saveData(STORAGE.accepted, tasks);
+      syncTaskToTreasury(tasks[idx]);
+      closeModal();
+      renderAccepted();
+      toast('修改已保存~');
+    }
+  } else {
+    taskData.id = genId();
+    taskData.completed = false;
+    const tasks = loadData(STORAGE.accepted);
+    tasks.push(taskData);
+    saveData(STORAGE.accepted, tasks);
+    syncTaskToTreasury(taskData);
+    closeModal();
+    renderAccepted();
+    toast('任务添加成功~');
+  }
+}
+
+// ==================== Sync Task to Treasury ====================
+function syncTaskToTreasury(task) {
+  if (!task.hasPayment || !task.paymentAmount) return;
+
+  let entries = loadData(STORAGE.treasury);
+  const existing = entries.find(e => e.linkedTaskId === task.id);
+
+  const syncData = {
+    brandProduct: task.brand + ' · ' + task.product,
+    amount: task.paymentAmount,
+    type: task.waterType || 'above'
+  };
+
+  if (existing) {
+    // 只更新同步字段，保留用户在小金库里修改过的字段
+    Object.assign(existing, syncData);
+  } else {
+    entries.push({
+      id: genId(),
+      ...syncData,
+      needsRebate: false,
+      rebateAmount: 0,
+      received: false,
+      linkedTaskId: task.id,
+      createdAt: new Date().toISOString()
+    });
+  }
+
+  saveData(STORAGE.treasury, entries);
+}
+
+function submitPending() {
+  const brand = val('p-brand');
+  const product = val('p-product');
+  const contactTime = val('p-contact-time');
+  if (!brand || !product) { toast('请填写品牌和产品~'); return; }
+
+  if (editMode && editMode.type === 'pending') {
+    let tasks = loadData(STORAGE.pending);
+    const idx = tasks.findIndex(x => x.id === editMode.id);
+    if (idx >= 0) {
+      tasks[idx] = { ...tasks[idx], brand, product, contactTime };
+      saveData(STORAGE.pending, tasks);
+      closeModal();
+      renderPending();
+      toast('修改已保存~');
+    }
+  } else {
+    const task = { id: genId(), brand, product, contactTime, completed: false };
+    const tasks = loadData(STORAGE.pending);
+    tasks.push(task);
+    saveData(STORAGE.pending, tasks);
+    closeModal();
+    renderPending();
+    toast('任务添加成功~');
+  }
+}
+
+function submitTreasury() {
+  const brandProduct = val('t-brand-product');
+  const amount = val('t-amount');
+  if (!brandProduct || !amount) { toast('请填写品牌产品和金额~'); return; }
+
+  const needsRebate = hasToggle('rebate');
+  const received = hasToggle('received');
+
+  const entryData = {
+    brandProduct,
+    amount: parseFloat(amount) || 0,
+    type: val('t-type'),
+    needsRebate,
+    rebateAmount: needsRebate ? (parseFloat(val('t-rebate-amount')) || 0) : 0,
+    received
+  };
+
+  if (editMode && editMode.type === 'treasury') {
+    let entries = loadData(STORAGE.treasury);
+    const idx = entries.findIndex(x => x.id === editMode.id);
+    if (idx >= 0) {
+      entries[idx] = { ...entries[idx], ...entryData };
+      saveData(STORAGE.treasury, entries);
+      closeModal();
+      renderTreasury();
+      toast('修改已保存~');
+    }
+  } else {
+    entryData.id = genId();
+    entryData.createdAt = new Date().toISOString();
+    const entries = loadData(STORAGE.treasury);
+    entries.push(entryData);
+    saveData(STORAGE.treasury, entries);
+    closeModal();
+    renderTreasury();
+    toast('收入记录成功~');
+  }
+}
+
+// ==================== Helpers ====================
+function val(id) { const el = document.getElementById(id); return el ? el.value.trim() : ''; }
+function hasToggle(target) {
+  const t = document.querySelector(`.toggle[data-target="${target}"]`);
+  return t && t.classList.contains('on');
+}
+function esc(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+function escAttr(s) { return String(s || '').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+function fmt(n) { return Number(n).toLocaleString('zh-CN', { minimumFractionDigits: 0, maximumFractionDigits: 2 }); }
+function emptyState(svgAnimal, text, hint) {
+  return `<div class="empty-state">${svgAnimal}<div class="empty-text">${text}</div><div class="empty-hint">${hint}</div></div>`;
+}
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(el._timer);
+  el._timer = setTimeout(() => el.classList.remove('show'), 2000);
+}
+
+// ==================== Icon Upload ====================
+function uploadIcon() {
+  document.getElementById('icon-input').click();
+}
+function handleIconUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  if (!file.type.startsWith('image/')) { toast('请选择图片文件~'); return; }
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    const dataUrl = ev.target.result;
+    try { localStorage.setItem('kitty_custom_icon', dataUrl); } catch(err) { toast('图片太大，请选小一点的~'); return; }
+    applyCustomIcon();
+    toast('图标已更新~');
+  };
+  reader.readAsDataURL(file);
+  e.target.value = '';
+}
+function applyCustomIcon() {
+  const dataUrl = localStorage.getItem('kitty_custom_icon');
+  const logo = document.getElementById('sidebar-logo');
+  if (dataUrl) {
+    logo.innerHTML = `<img src="${dataUrl}" alt="logo">`;
+  } else {
+    logo.innerHTML = '<div id="logo-placeholder">📷<div class="hint-text">换图标</div></div>';
+  }
+}
+
+// ==================== Init ====================
+initializeData();
+applyCustomIcon();
+renderAccepted();
+
+// ==================== Service Worker (离线缓存) ====================
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+{
+  "name": "阳光大美妞的工作台",
+  "short_name": "阳光大美妞",
+  "description": "淡淡治愈风博主工作台 - 任务管理与记账",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F4F1E6",
+  "theme_color": "#A5D6DB",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
