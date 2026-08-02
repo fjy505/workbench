@@ -250,6 +250,54 @@ body::before {
   opacity: 0.5;
   margin-bottom: 4px;
 }
+.sidebar-tool {
+  font-size: 17px;
+  opacity: 0.55;
+  cursor: pointer;
+  padding: 4px;
+  transition: opacity 0.2s, transform 0.2s;
+}
+.sidebar-tool:active { opacity: 1; transform: scale(1.25) rotate(90deg); }
+
+/* ==================== Data Panel ==================== */
+.data-section {
+  margin-bottom: 20px;
+  padding-bottom: 18px;
+  border-bottom: 1px dashed rgba(77,69,66,0.15);
+}
+.data-section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+.data-label {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--bark);
+  margin-bottom: 6px;
+}
+.data-desc {
+  font-size: 12px;
+  color: rgba(77,69,66,0.55);
+  line-height: 1.6;
+  margin-bottom: 12px;
+}
+.data-warn {
+  font-size: 11px;
+  color: #C97D5D;
+  margin-top: 8px;
+  line-height: 1.5;
+}
+.btn-data {
+  width: 100%;
+  padding: 12px;
+  border: 2px dashed rgba(77,69,66,0.25);
+  border-radius: 14px;
+  background: var(--cream);
+  color: var(--bark);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+.btn-data:active { transform: scale(0.97); background: rgba(165,214,219,0.3); }
 
 /* ==================== Main Content ==================== */
 .main-content {
@@ -1372,6 +1420,7 @@ body::before {
       <div class="nav-label">小金库</div>
     </div>
     <div class="sidebar-spacer"></div>
+    <div class="sidebar-tool" onclick="openDataPanel()" title="数据备份">⚙️</div>
     <div class="sidebar-paw">🐾</div>
     <div class="sidebar-footer">阳光<br>大美妞</div>
   </nav>
@@ -1412,6 +1461,28 @@ body::before {
 <!-- ==================== Modal ==================== -->
 <div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)closeModal()">
   <div class="modal" id="modal-content"></div>
+</div>
+
+<!-- ==================== Data Backup Panel ==================== -->
+<div class="modal-overlay" id="data-overlay" onclick="if(event.target===this)closeDataPanel()">
+  <div class="modal" id="data-modal" style="max-height:80vh;overflow-y:auto;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;padding-bottom:12px;border-bottom:2px dashed rgba(77,69,66,0.15);">
+      <span style="font-size:17px;font-weight:800;color:var(--bark);">📦 数据备份</span>
+      <span class="modal-close" onclick="closeDataPanel()" style="font-size:20px;cursor:pointer;color:rgba(77,69,66,0.5);">✕</span>
+    </div>
+    <div class="data-section">
+      <div class="data-label">📤 导出备份</div>
+      <div class="data-desc">把全部任务和小金库数据打包导出，保存到手机「文件」里。建议每周备份一次。</div>
+      <button class="btn-data" onclick="exportData()">导出数据到文件</button>
+    </div>
+    <div class="data-section">
+      <div class="data-label">📥 导入恢复</div>
+      <div class="data-desc">从之前导出的备份文件恢复数据。</div>
+      <button class="btn-data" onclick="document.getElementById('import-input').click()">选择备份文件</button>
+      <input type="file" id="import-input" accept=".json,application/json" style="display:none" onchange="importData(event)">
+      <div class="data-warn">⚠️ 导入会覆盖当前所有数据，请确认后再操作</div>
+    </div>
+  </div>
 </div>
 
 <!-- ==================== Toast ==================== -->
@@ -2217,6 +2288,105 @@ function attachToggles(overlay) {
 function closeModal() {
   document.getElementById('modal-overlay').classList.remove('show');
   editMode = null;
+}
+
+/* ==================== Data Backup & Restore ==================== */
+function openDataPanel() {
+  document.getElementById('data-overlay').classList.add('show');
+}
+function closeDataPanel() {
+  document.getElementById('data-overlay').classList.remove('show');
+}
+
+async function exportData() {
+  const data = {};
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && key.startsWith('kitty_')) {
+      data[key] = localStorage.getItem(key);
+    }
+  }
+  data.__exportTime = new Date().toISOString();
+  data.__version = '1.0';
+  const json = JSON.stringify(data, null, 2);
+  const now = new Date();
+  const dateStr = now.getFullYear() + String(now.getMonth()+1).padStart(2,'0') + String(now.getDate()).padStart(2,'0');
+  const filename = 'workbench_backup_' + dateStr + '.json';
+  const blob = new Blob([json], { type: 'application/json' });
+
+  // iOS 17+ 支持 Web Share API 分享文件
+  if (navigator.share && navigator.canShare) {
+    try {
+      const file = new File([blob], filename, { type: 'application/json' });
+      if (navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: '阳光大美妞工作台备份' });
+        toast('数据已导出~');
+        return;
+      }
+    } catch(err) {
+      if (err.name === 'AbortError') return; // 用户取消
+    }
+  }
+
+  // 回退方案：下载文件
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+  // 同时尝试复制到剪贴板（iOS Safari 下载可能不生效）
+  try {
+    await navigator.clipboard.writeText(json);
+    toast('数据已下载并复制到剪贴板~');
+  } catch(e) {
+    toast('数据已导出~');
+  }
+}
+
+function importData(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data.__version) {
+        toast('文件格式不对哦~');
+        return;
+      }
+      if (!confirm('导入会覆盖当前所有数据，确定吗？')) {
+        event.target.value = '';
+        return;
+      }
+      // 清除旧的 kitty_ 数据
+      const keysToRemove = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('kitty_')) keysToRemove.push(key);
+      }
+      keysToRemove.forEach(k => localStorage.removeItem(k));
+      // 写入新数据
+      for (const key in data) {
+        if (key.startsWith('kitty_')) {
+          localStorage.setItem(key, data[key]);
+        }
+      }
+      // 重新渲染所有页面
+      renderAccepted();
+      renderPending();
+      renderTreasury();
+      closeDataPanel();
+      toast('数据导入成功~');
+    } catch(err) {
+      toast('文件读取失败，请检查格式~');
+    }
+    event.target.value = '';
+  };
+  reader.readAsText(file);
 }
 
 function acceptedFormHTML(d) {

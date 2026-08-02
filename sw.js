@@ -1,7 +1,7 @@
 // 阳光大美妞的工作台 - Service Worker
 // 离线缓存：首次加载后完整缓存应用，断网也能秒开
 
-const CACHE_VERSION = 'v11';
+const CACHE_VERSION = 'v12';
 const CACHE_NAME = 'meinv-workbench-' + CACHE_VERSION;
 const ASSETS = [
   './',
