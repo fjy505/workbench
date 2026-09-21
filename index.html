@@ -1512,6 +1512,11 @@ body::before {
       <input type="file" id="import-input" accept=".json,application/json" style="display:none" onchange="importData(event)">
       <div class="data-warn">⚠️ 导入会覆盖当前所有数据，请确认后再操作</div>
     </div>
+    <div class="data-section">
+      <div class="data-label">🔄 刷新页面</div>
+      <div class="data-desc">从桌面图标打开时无法下拉刷新，用这个按钮强制加载最新版本（不会动你的数据）。</div>
+      <button class="btn-data" onclick="hardRefresh()">刷新 / 检查更新</button>
+    </div>
   </div>
 </div>
 
@@ -2486,6 +2491,22 @@ function openDataPanel() {
 }
 function closeDataPanel() {
   document.getElementById('data-overlay').classList.remove('show');
+}
+
+// 强制刷新：注销旧 Service Worker 后重载，确保抓到最新版本（数据不会丢）
+function hardRefresh() {
+  closeDataPanel();
+  const finish = () => {
+    window.location.href = 'index.html?t=' + Date.now();
+  };
+  if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
+    navigator.serviceWorker.getRegistrations()
+      .then(regs => Promise.all(regs.map(r => r.unregister())))
+      .catch(() => {})
+      .then(() => setTimeout(finish, 300));
+  } else {
+    setTimeout(finish, 100);
+  }
 }
 
 async function exportData() {
