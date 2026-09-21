@@ -584,18 +584,6 @@ body::before {
   color: var(--bark-mid);
   margin-bottom: 7px;
   padding-left: 22px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.drag-hint {
-  font-size: 9.5px;
-  color: var(--sky-deep);
-  background: rgba(255,255,255,0.7);
-  border: 1px dashed rgba(123,184,191,0.6);
-  border-radius: 6px;
-  padding: 1px 6px;
-  letter-spacing: 0.2px;
 }
 .collection-cards .task-card {
   background: #FFF;
@@ -1513,7 +1501,7 @@ body::before {
       <span class="modal-close" onclick="closeDataPanel()" style="font-size:20px;cursor:pointer;color:rgba(77,69,66,0.5);">✕</span>
     </div>
     <div style="font-size:10.5px;color:rgba(77,69,66,0.45);margin:-8px 0 14px;letter-spacing:0.3px;">
-      当前版本 v22 · 若此处仍是旧版本号，说明页面未更新
+      当前版本 v23 · 若此处仍是旧版本号，说明页面未更新
     </div>
     <div class="data-section">
       <div class="data-label">📤 导出备份</div>
@@ -2123,7 +2111,7 @@ function renderAccepted() {
             <span class="collection-count">${doneCount}/${items.length}</span>
             <span class="collection-fee">¥${totalFee}</span>
           </div>
-          <div class="collection-deadline">截止：${edl === '9999' ? '未设置' : esc(edl)}<span class="drag-hint">长按卡片可排序</span></div>
+          <div class="collection-deadline">截止：${edl === '9999' ? '未设置' : esc(edl)}</div>
           <div class="collection-cards" data-cname="${escAttr(name)}">${items.map(x => renderCard(x, { name, inCollection: true })).join('')}</div>
         </div>`;
     }
