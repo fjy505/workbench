@@ -1,7 +1,7 @@
 // 阳光大美妞的工作台 - Service Worker
 // 离线缓存：首次加载后完整缓存应用，断网也能秒开
 
-const CACHE_VERSION = 'v17';
+const CACHE_VERSION = 'v18';
 const CACHE_NAME = 'meinv-workbench-' + CACHE_VERSION;
 const ASSETS = [
   './',
@@ -30,8 +30,20 @@ self.addEventListener('activate', e => {
   self.clients.claim(); // 立即接管页面
 });
 
-// 请求拦截：缓存优先，回退网络
+// 请求拦截：
+//  - 导航请求（打开页面）→ 网络优先，保证每次打开都是最新版本；断网才回退缓存
+//  - 其他资源 → 缓存优先，保证离线可用与秒开
 self.addEventListener('fetch', e => {
+  if (e.request.mode === 'navigate') {
+    e.respondWith(
+      fetch(e.request).then(resp => {
+        const clone = resp.clone();
+        caches.open(CACHE_NAME).then(c => c.put('./index.html', clone)).catch(() => {});
+        return resp;
+      }).catch(() => caches.match('./index.html'))
+    );
+    return;
+  }
   e.respondWith(
     caches.match(e.request).then(cached => {
       if (cached) return cached;
