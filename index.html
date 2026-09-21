@@ -499,23 +499,23 @@ body::before {
 
 .collection-group {
   background: linear-gradient(135deg, rgba(165, 214, 219, 0.18) 0%, rgba(249, 233, 217, 0.22) 100%);
-  border: 2px dashed var(--sky-deep);
-  border-radius: var(--radius);
-  padding: 14px 12px 6px;
-  margin-bottom: 18px;
+  border: 1.5px dashed var(--sky-deep);
+  border-radius: var(--radius-sm);
+  padding: 12px 10px 4px;
+  margin-bottom: 12px;
   position: relative;
 }
 .collection-group::before {
   content: '合集';
   position: absolute;
-  top: -10px;
-  left: 14px;
+  top: -8px;
+  left: 12px;
   background: var(--sky-deep);
   color: #FFF;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
-  padding: 2px 10px;
-  border-radius: 10px;
+  padding: 1.5px 8px;
+  border-radius: 8px;
   letter-spacing: 1px;
   box-shadow: 0 2px 6px rgba(123, 184, 191, 0.4);
 }
@@ -535,7 +535,7 @@ body::before {
 }
 .collection-group.completed .collection-icon { color: var(--bark-light); }
 .collection-name {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 800;
   color: var(--bark);
   flex: 1;
@@ -543,12 +543,12 @@ body::before {
   word-break: break-all;
 }
 .collection-count {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
   color: var(--sky-deep);
   background: rgba(165, 214, 219, 0.25);
-  padding: 2px 8px;
-  border-radius: 8px;
+  padding: 1.5px 7px;
+  border-radius: 7px;
   flex-shrink: 0;
 }
 .collection-group.completed .collection-count {
@@ -556,32 +556,50 @@ body::before {
   background: rgba(168, 159, 153, 0.18);
 }
 .collection-fee {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 800;
   color: #B8865A;
   flex-shrink: 0;
 }
+/* Collection sort control */
+.collection-sort {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--sky-deep);
+  background: rgba(255,255,255,0.85);
+  border: 1px dashed var(--sky-deep);
+  border-radius: 7px;
+  padding: 2px 4px;
+  cursor: pointer;
+  flex-shrink: 0;
+  font-family: inherit;
+  -webkit-appearance: none;
+  appearance: none;
+  line-height: 1.4;
+  max-width: 78px;
+}
+.collection-sort:active { background: var(--sky-pale); }
 .collection-deadline {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--bark-mid);
-  margin-bottom: 10px;
-  padding-left: 24px;
+  margin-bottom: 7px;
+  padding-left: 22px;
 }
 .collection-cards .task-card {
   background: #FFF;
-  margin-bottom: 10px;
+  margin-bottom: 7px;
 }
 
 /* ==================== Task Cards (Accepted) ==================== */
 .task-card {
   background: var(--card);
-  border-radius: var(--radius);
-  padding: 16px;
-  margin-bottom: 14px;
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  margin-bottom: 8px;
   box-shadow: var(--shadow);
   position: relative;
   transition: all 0.25s;
-  border: 2px solid var(--line);
+  border: 1.5px solid var(--line);
 }
 .task-card.completed { opacity: 0.55; background: var(--moss-soft); }
 .task-card.completed .task-title {
@@ -593,10 +611,10 @@ body::before {
 .task-card::after {
   content: '';
   position: absolute;
-  top: -10px;
-  left: 20px;
-  width: 58px;
-  height: 18px;
+  top: -7px;
+  left: 16px;
+  width: 44px;
+  height: 14px;
   background: linear-gradient(135deg, rgba(255, 143, 168, 0.6) 0%, rgba(93, 180, 192, 0.5) 100%);
   transform: rotate(-4deg);
   border-radius: 1px;
@@ -607,16 +625,16 @@ body::before {
 .task-card-top {
   display: flex;
   align-items: flex-start;
-  gap: 10px;
-  margin-bottom: 10px;
+  gap: 8px;
+  margin-bottom: 0;
 }
 /* Checkbox — cute rounded */
 .task-checkbox {
-  width: 26px;
-  height: 26px;
-  min-width: 26px;
-  border: 2.5px solid var(--sky);
-  border-radius: 8px;
+  width: 22px;
+  height: 22px;
+  min-width: 22px;
+  border: 2px solid var(--sky);
+  border-radius: 7px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -635,21 +653,21 @@ body::before {
 .task-checkbox.checked::after {
   content: '✓';
   color: #FFF;
-  font-size: 16px;
+  font-size: 13px;
   font-weight: 800;
 }
 .task-title-area { flex: 1; min-width: 0; }
 .task-title {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 800;
   color: var(--bark);
-  line-height: 1.4;
+  line-height: 1.35;
   letter-spacing: 0.2px;
 }
 .task-deadline {
-  font-size: 11px;
+  font-size: 10.5px;
   color: var(--bark);
-  margin-top: 3px;
+  margin-top: 2px;
   font-weight: 700;
   display: flex;
   align-items: center;
@@ -711,17 +729,17 @@ body::before {
   border-style: solid;
 }
 .btn-delete {
-  width: 30px;
-  height: 30px;
-  min-width: 30px;
+  width: 26px;
+  height: 26px;
+  min-width: 26px;
   border: 1.5px solid transparent;
   background: transparent;
-  border-radius: 10px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 13px;
   color: var(--bark-light);
   transition: all 0.2s;
 }
@@ -733,40 +751,42 @@ body::before {
 .task-details {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  padding-left: 34px;
+  gap: 3px;
+  padding-left: 30px;
+  margin-top: 5px;
 }
 .task-detail-row {
   width: 100%;
   display: flex;
   align-items: flex-start;
   gap: 8px;
-  font-size: 12px;
-  line-height: 1.6;
+  font-size: 11.5px;
+  line-height: 1.5;
   color: var(--bark);
 }
 .task-detail-label {
   color: var(--bark-light);
-  min-width: 60px;
+  min-width: 52px;
   font-weight: 700;
-  font-size: 11px;
+  font-size: 10.5px;
   flex-shrink: 0;
 }
 .task-detail-value { flex: 1; word-break: break-word; min-width: 0; }
 .task-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  padding-left: 34px;
-  margin-top: 8px;
+  gap: 4px;
+  padding-left: 30px;
+  margin-top: 5px;
 }
 .tag {
-  padding: 4px 10px;
-  border-radius: 10px;
-  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 8px;
+  font-size: 9.5px;
   font-weight: 700;
-  letter-spacing: 0.3px;
-  border: 1.5px dashed;
+  letter-spacing: 0.2px;
+  border: 1px dashed;
+  line-height: 1.5;
 }
 .tag-advance { background: var(--cream-soft); color: var(--cream-deep); border-color: var(--cream); }
 .tag-payment { background: var(--sky-pale); color: var(--sky-deep); border-color: var(--sky); }
@@ -1279,10 +1299,10 @@ body::before {
   display: flex;
 }
 .expand-toggle {
-  font-size: 11px;
+  font-size: 10px;
   color: var(--bark-light);
   text-align: center;
-  margin-top: 10px;
+  margin-top: 6px;
   font-weight: 600;
   letter-spacing: 0.3px;
   display: flex;
@@ -1309,17 +1329,17 @@ body::before {
   font-weight: 600;
 }
 .btn-edit {
-  width: 30px;
-  height: 30px;
-  min-width: 30px;
+  width: 26px;
+  height: 26px;
+  min-width: 26px;
   border: 1.5px solid transparent;
   background: transparent;
-  border-radius: 10px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  font-size: 13px;
+  font-size: 12px;
   color: var(--sky-deep);
   transition: all 0.2s;
 }
@@ -1362,7 +1382,7 @@ body::before {
   .page-header { padding: 0; }
   .page-title { font-size: 19px; }
   .btn-add { padding: 8px 12px; font-size: 11px; border-radius: 20px; }
-  .task-card, .pending-card, .treasury-card { padding: 12px; border-radius: 16px; }
+  .task-card, .pending-card, .treasury-card { padding: 9px 11px; border-radius: 14px; margin-bottom: 8px; }
   .dash-card { padding: 14px 8px; border-radius: 16px; }
   .dash-value { font-size: 18px; }
   .dash-card.total .dash-value { font-size: 24px; }
@@ -1819,6 +1839,12 @@ function switchPage(page) {
 }
 
 // ==================== Render: Accepted Tasks ====================
+// 合集排序偏好（每个合集独立记忆）
+function setCollectionSort(name, val) {
+  localStorage.setItem('kitty_csort_' + name, val);
+  renderAccepted();
+}
+
 function renderAccepted() {
   const list = document.getElementById('accepted-list');
   let tasks = loadData(STORAGE.accepted);
@@ -1846,10 +1872,8 @@ function renderAccepted() {
         <button class="btn-edit" onclick="event.stopPropagation();editAccepted('${t.id}');">✎</button>
         <button class="btn-delete" onclick="event.stopPropagation();deleteAccepted('${t.id}');">✕</button>
       </div>
-      <div class="task-card-meta">
-        <span class="publish-format">${esc(t.publishFormat || '未填写发布形式')}</span>
-      </div>
       <div class="task-details">
+        <div class="task-detail-row"><span class="task-detail-label">发布形式</span><span class="task-detail-value">${esc(t.publishFormat || '-')}</span></div>
         <div class="task-detail-row"><span class="task-detail-label">水上/水下</span><span class="task-detail-value">${t.waterType === 'below' ? '💧 水下（私下/未公开）' : '🌊 水上（官方/公开）'}</span></div>
         <div class="task-detail-row"><span class="task-detail-label">联系方式</span><span class="task-detail-value">${esc(t.contact || '-')}</span></div>
         <div class="task-detail-row"><span class="task-detail-label">任务要求</span><span class="task-detail-value">${esc(t.requirements || '-')}</span></div>
@@ -1880,8 +1904,29 @@ function renderAccepted() {
       const ds = items.filter(x => x.deadline).map(x => x.deadline).sort();
       return ds[0] || '9999';
     };
-    for (const items of groups.values()) {
-      items.sort((a, b) => (a.deadline || '9999').localeCompare(b.deadline || '9999'));
+    const getSortMode = name => localStorage.getItem('kitty_csort_' + name) || 'deadline';
+    // 合集内排序：支持按截止/品牌/稿费/添加顺序
+    const applyCollectionSort = (name, items) => {
+      const mode = getSortMode(name);
+      const shouldSink = t => t.completed && !(t.needsAdvance && !t.refunded);
+      if (mode === 'brand') {
+        items.sort((a, b) => (a.brand || '').localeCompare(b.brand || '', 'zh'));
+      } else if (mode === 'fee') {
+        items.sort((a, b) => (parseFloat(b.paymentAmount) || 0) - (parseFloat(a.paymentAmount) || 0));
+      } else if (mode === 'added') {
+        /* 保持录入原始顺序 */
+      } else {
+        // deadline：未完成在前，已完成沉底，按截止升序
+        items.sort((a, b) => {
+          const aSink = shouldSink(a), bSink = shouldSink(b);
+          if (aSink !== bSink) return aSink ? 1 : -1;
+          return (a.deadline || '9999').localeCompare(b.deadline || '9999');
+        });
+      }
+      return items;
+    };
+    for (const [name, items] of groups) {
+      applyCollectionSort(name, items);
     }
     // 独立任务：未完成在前按 deadline 升序，已完成且无未返款垫款的沉底
     const shouldSink = t => t.completed && !(t.needsAdvance && !t.refunded);
@@ -1904,11 +1949,16 @@ function renderAccepted() {
       const edl = earliestDeadline(items);
       const doneCount = items.filter(x => x.completed).length;
       const allDone = doneCount === items.length;
+      const sm = getSortMode(name);
+      const opt = (v, label) => `<option value="${v}"${sm === v ? ' selected' : ''}>${label}</option>`;
       h += `
         <div class="collection-group ${allDone ? 'completed' : ''}">
           <div class="collection-header">
             <span class="collection-icon">✦</span>
             <span class="collection-name">${esc(name)}</span>
+            <select class="collection-sort" data-name="${escAttr(name)}" onclick="event.stopPropagation()" onchange="setCollectionSort(this.dataset.name, this.value)">
+              ${opt('deadline','按截止')}${opt('brand','按品牌')}${opt('fee','按稿费')}${opt('added','按添加')}
+            </select>
             <span class="collection-count">${doneCount}/${items.length}</span>
             <span class="collection-fee">¥${totalFee}</span>
           </div>
