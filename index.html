@@ -381,6 +381,20 @@ body::before {
 }
 
 /* ==================== Collection Group (合集) ==================== */
+/* Carry-over badge (上月结余) */
+.carryover-tag {
+  display: block;
+  background: linear-gradient(135deg, rgba(249, 233, 217, 0.9) 0%, rgba(252, 232, 222, 0.9) 100%);
+  border: 1.5px dashed #E8A88E;
+  border-radius: 12px;
+  padding: 7px 12px;
+  margin-bottom: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #C9654A;
+  letter-spacing: 0.2px;
+  line-height: 1.4;
+}
 .accepted-stats {
   display: flex;
   align-items: center;
@@ -561,24 +575,7 @@ body::before {
   color: #B8865A;
   flex-shrink: 0;
 }
-/* Collection sort control */
-.collection-sort {
-  font-size: 10px;
-  font-weight: 700;
-  color: var(--sky-deep);
-  background: rgba(255,255,255,0.85);
-  border: 1px dashed var(--sky-deep);
-  border-radius: 7px;
-  padding: 2px 4px;
-  cursor: pointer;
-  flex-shrink: 0;
-  font-family: inherit;
-  -webkit-appearance: none;
-  appearance: none;
-  line-height: 1.4;
-  max-width: 78px;
-}
-.collection-sort:active { background: var(--sky-pale); }
+/* Collection sort control (已废弃：改为拖拽排序，样式保留待清理) */
 .collection-deadline {
   font-size: 11px;
   color: var(--bark-mid);
@@ -1348,6 +1345,19 @@ body::before {
   background: rgba(93, 180, 192, 0.12);
   border-color: var(--sky-soft);
 }
+/* 拖拽中的卡片（按住上下移动时） */
+.task-card.dragging {
+  position: relative;
+  z-index: 30;
+  opacity: 0.96;
+  box-shadow: 0 10px 26px rgba(77, 69, 66, 0.24);
+  border-color: var(--sky-deep);
+  cursor: grabbing;
+  transition: none;
+  transform-origin: center;
+}
+/* 合集内的卡片提示可拖动 */
+.collection-cards .task-card { touch-action: pan-y; }
 
 /* Unreceived note */
 .unreceived-note {
@@ -1430,10 +1440,6 @@ body::before {
     <div class="nav-item active" data-page="accepted" onclick="switchPage('accepted')">
       <div class="nav-icon">📝</div>
       <div class="nav-label">已接任务</div>
-    </div>
-    <div class="nav-item" data-page="pending" onclick="switchPage('pending')">
-      <div class="nav-icon">📥</div>
-      <div class="nav-label">未接任务</div>
     </div>
     <div class="nav-item" data-page="treasury" onclick="switchPage('treasury')">
       <div class="nav-icon">💰</div>
@@ -1839,9 +1845,100 @@ function switchPage(page) {
 }
 
 // ==================== Render: Accepted Tasks ====================
-// 合集排序偏好（每个合集独立记忆）
-function setCollectionSort(name, val) {
-  localStorage.setItem('kitty_csort_' + name, val);
+// 合集拖拽排序的顺序记录（合集名 -> 任务id数组）
+function getManualOrder(name) {
+  try { return JSON.parse(localStorage.getItem('kitty_order_' + name)) || null; }
+  catch(e) { return null; }
+}
+function setManualOrder(name, ids) {
+  localStorage.setItem('kitty_order_' + name, JSON.stringify(ids));
+}
+
+/* ===== 合集内拖拽排序：按住任务卡片上下拖即可换位 ===== */
+let _drag = null;
+let _justDragged = false; // 拖动结束后抑制一次 click，避免误触发展开
+
+function startDrag(ev) {
+  const card = ev.currentTarget;
+  if (!card || !card.classList.contains('task-card')) return;
+  const wrap = card.parentElement;
+  if (!wrap || !wrap.classList.contains('collection-cards')) return;
+  // 复选框/编辑/删除按钮上的操作不触发拖拽
+  if (ev.target && ev.target.closest('.task-checkbox, .btn-edit, .btn-delete')) return;
+  const pt = ev.touches ? ev.touches[0] : ev;
+  _drag = {
+    card: card, wrap: wrap,
+    name: wrap.getAttribute('data-cname') || '',
+    startY: pt.clientY, lastY: pt.clientY,
+    offset: 0, active: false
+  };
+  const move = e2 => dragMove(e2.touches ? e2.touches[0] : e2, e2);
+  const up = () => {
+    document.removeEventListener('touchmove', move);
+    document.removeEventListener('touchend', up);
+    document.removeEventListener('mousemove', move);
+    document.removeEventListener('mouseup', up);
+    endDrag();
+  };
+  document.addEventListener('touchmove', move, { passive: false });
+  document.addEventListener('touchend', up);
+  document.addEventListener('mousemove', move);
+  document.addEventListener('mouseup', up);
+}
+
+function dragMove(pt, rawEv) {
+  if (!_drag) return;
+  if (!_drag.active) {
+    if (Math.abs(pt.clientY - _drag.startY) < 6) return; // 未过阈值 → 当作点击，不影响展开
+    _drag.active = true;
+    _drag.card.classList.add('dragging');
+  }
+  if (rawEv && rawEv.preventDefault) rawEv.preventDefault();
+  const delta = pt.clientY - _drag.lastY;
+  _drag.lastY = pt.clientY;
+  _drag.offset += delta;
+  _drag.card.style.transform = 'translateY(' + _drag.offset + 'px)';
+
+  // 与相邻卡片换位（7px 为卡片间距）
+  const GAP = 7;
+  let cards = Array.from(_drag.wrap.children);
+  let idx = cards.indexOf(_drag.card);
+  if (idx > 0) {
+    const prev = cards[idx - 1];
+    const pr = prev.getBoundingClientRect();
+    if (_drag.card.getBoundingClientRect().top < pr.top + pr.height / 2) {
+      _drag.wrap.insertBefore(_drag.card, prev);
+      _drag.offset += pr.height + GAP;
+      _drag.card.style.transform = 'translateY(' + _drag.offset + 'px)';
+      return;
+    }
+  }
+  cards = Array.from(_drag.wrap.children);
+  idx = cards.indexOf(_drag.card);
+  if (idx < cards.length - 1) {
+    const next = cards[idx + 1];
+    const nr = next.getBoundingClientRect();
+    if (_drag.card.getBoundingClientRect().bottom > nr.top + nr.height / 2) {
+      _drag.wrap.insertBefore(next, _drag.card);
+      _drag.offset -= (nr.height + GAP);
+      _drag.card.style.transform = 'translateY(' + _drag.offset + 'px)';
+    }
+  }
+}
+
+function endDrag() {
+  if (!_drag) return;
+  const d = _drag;
+  _drag = null;
+  if (!d.active) return; // 只是点了一下，交给原本的点击事件
+  d.card.classList.remove('dragging');
+  d.card.style.transform = '';
+  _justDragged = true;
+  setTimeout(() => { _justDragged = false; }, 350);
+  const ids = Array.from(d.wrap.children)
+    .map(el => el.getAttribute('data-task-id'))
+    .filter(Boolean);
+  if (d.name && ids.length) setManualOrder(d.name, ids);
   renderAccepted();
 }
 
@@ -1849,20 +1946,36 @@ function renderAccepted() {
   const list = document.getElementById('accepted-list');
   let tasks = loadData(STORAGE.accepted);
 
-  const total = tasks.length;
-  const completedCount = tasks.filter(t => t.completed).length;
-  const pendingCount = total - completedCount;
+  const total = tasks.length; // 仅用于空状态判断
+  // 统计只算当月（每月自动重置，不跨月累计）
+  const curMonthKey = getCurrentMonthKey();
+  const thisMonthTasks = tasks.filter(t => getMonthKey(t.deadline) === curMonthKey);
+  const completedCount = thisMonthTasks.filter(t => t.completed).length;
+  const pendingCount = thisMonthTasks.length - completedCount;
+  // 上月结余：截止日期早于本月、但仍未完成的任务
+  const carriedTasks = tasks.filter(t => {
+    const k = getMonthKey(t.deadline);
+    return k && k < curMonthKey && !t.completed;
+  });
+  const carriedOver = carriedTasks.length;
+  // 上月结转的未结算垫款金额
+  const carriedAdvance = carriedTasks
+    .filter(t => t.needsAdvance && !t.refunded)
+    .reduce((s, t) => s + (parseFloat(t.advanceAmount) || 0), 0);
 
   if (total === 0) {
     list.innerHTML = emptyState(animalSVGs.bunny, '还没有已接任务哦~', '点击右上角添加第一个任务吧');
     return;
   }
 
-  const renderCard = t => {
+  const renderCard = (t, ctx) => {
     const today = new Date().toISOString().slice(0,10);
     const isUrgent = !t.completed && t.deadline && t.deadline <= today;
+    const inColl = !!(ctx && ctx.inCollection);
+    // 合集内的卡片整张可拖动排序；独立任务不加拖拽
+    const dragAttr = inColl ? ' ontouchstart="startDrag(event)" onmousedown="startDrag(event)"' : '';
     return `
-    <div class="task-card ${t.completed ? 'completed' : ''}" data-task-id="${t.id}" onclick="toggleExpand('${t.id}')">
+    <div class="task-card ${t.completed ? 'completed' : ''}" data-task-id="${t.id}" onclick="toggleExpand('${t.id}')"${dragAttr}>
       <div class="task-card-top">
         <div class="task-checkbox ${t.completed ? 'checked' : ''}" onclick="event.stopPropagation();toggleAccepted('${t.id}');"></div>
         <div class="task-title-area">
@@ -1904,25 +2017,23 @@ function renderAccepted() {
       const ds = items.filter(x => x.deadline).map(x => x.deadline).sort();
       return ds[0] || '9999';
     };
-    const getSortMode = name => localStorage.getItem('kitty_csort_' + name) || 'deadline';
-    // 合集内排序：支持按截止/品牌/稿费/添加顺序
+    // 合集内顺序优先级：①已完成沉底 → ②用户拖拽顺序 → ③截止日期
     const applyCollectionSort = (name, items) => {
-      const mode = getSortMode(name);
       const shouldSink = t => t.completed && !(t.needsAdvance && !t.refunded);
-      if (mode === 'brand') {
-        items.sort((a, b) => (a.brand || '').localeCompare(b.brand || '', 'zh'));
-      } else if (mode === 'fee') {
-        items.sort((a, b) => (parseFloat(b.paymentAmount) || 0) - (parseFloat(a.paymentAmount) || 0));
-      } else if (mode === 'added') {
-        /* 保持录入原始顺序 */
-      } else {
-        // deadline：未完成在前，已完成沉底，按截止升序
-        items.sort((a, b) => {
-          const aSink = shouldSink(a), bSink = shouldSink(b);
-          if (aSink !== bSink) return aSink ? 1 : -1;
-          return (a.deadline || '9999').localeCompare(b.deadline || '9999');
-        });
-      }
+      const order = getManualOrder(name);
+      const hasOrder = !!(order && order.length);
+      items.sort((a, b) => {
+        // ①已完成（且垫款已返）永远沉底，优先级高于手动拖拽结果
+        const aSink = shouldSink(a), bSink = shouldSink(b);
+        if (aSink !== bSink) return aSink ? 1 : -1;
+        // ②其次尊重用户拖拽出来的顺序
+        if (hasOrder) {
+          const pa = order.indexOf(a.id), pb = order.indexOf(b.id);
+          return (pa === -1 ? 9999 : pa) - (pb === -1 ? 9999 : pb);
+        }
+        // ③没拖过就按截止日期从早到晚
+        return (a.deadline || '9999').localeCompare(b.deadline || '9999');
+      });
       return items;
     };
     for (const [name, items] of groups) {
@@ -1948,22 +2059,18 @@ function renderAccepted() {
       const totalFee = items.reduce((s, x) => s + (x.hasPayment ? (parseFloat(x.paymentAmount) || 0) : 0), 0);
       const edl = earliestDeadline(items);
       const doneCount = items.filter(x => x.completed).length;
-      const allDone = doneCount === items.length;
-      const sm = getSortMode(name);
-      const opt = (v, label) => `<option value="${v}"${sm === v ? ' selected' : ''}>${label}</option>`;
+      // 灰化样式与沉底排序保持同一判断，避免「看着像完成却排在活跃区」
+      const allDone = items.every(x => shouldSink(x));
       h += `
         <div class="collection-group ${allDone ? 'completed' : ''}">
           <div class="collection-header">
             <span class="collection-icon">✦</span>
             <span class="collection-name">${esc(name)}</span>
-            <select class="collection-sort" data-name="${escAttr(name)}" onclick="event.stopPropagation()" onchange="setCollectionSort(this.dataset.name, this.value)">
-              ${opt('deadline','按截止')}${opt('brand','按品牌')}${opt('fee','按稿费')}${opt('added','按添加')}
-            </select>
             <span class="collection-count">${doneCount}/${items.length}</span>
             <span class="collection-fee">¥${totalFee}</span>
           </div>
           <div class="collection-deadline">截止：${edl === '9999' ? '未设置' : esc(edl)}</div>
-          <div class="collection-cards">${items.map(renderCard).join('')}</div>
+          <div class="collection-cards" data-cname="${escAttr(name)}">${items.map(x => renderCard(x, { name, inCollection: true })).join('')}</div>
         </div>`;
     }
     h += standalone.map(renderCard).join('');
@@ -1990,15 +2097,20 @@ function renderAccepted() {
 
   let html = '';
 
-  // 顶部统计栏（全局统计）
+  // 顶部统计栏（当月独立统计，不叠加历史月份）
+  const curMonthNum = parseInt(curMonthKey.split('-')[1], 10);
+  const carryText = carriedAdvance > 0
+    ? `📌 上月结余 · ${carriedOver}项未完成 · 待返款 ¥${fmt(carriedAdvance)}`
+    : `📌 上月结余 · ${carriedOver}项未完成`;
   html += `
     <div class="accepted-stats">
-      <div class="stat-item"><span class="stat-num">${total}</span><span class="stat-label">总任务</span></div>
+      <div class="stat-item"><span class="stat-num">${thisMonthTasks.length}</span><span class="stat-label">${curMonthNum}月任务</span></div>
       <div class="stat-divider"></div>
       <div class="stat-item done"><span class="stat-num">${completedCount}</span><span class="stat-label">已完成</span></div>
       <div class="stat-divider"></div>
       <div class="stat-item pending"><span class="stat-num">${pendingCount}</span><span class="stat-label">未完成</span></div>
-    </div>`;
+    </div>
+    ${carriedOver > 0 ? `<div class="carryover-tag">${carryText}</div>` : ''}`;
 
   // 渲染月份组
   for (const key of sortedKeys) {
@@ -2034,6 +2146,7 @@ function toggleMonthSection(section, key) {
 }
 
 function toggleExpand(id) {
+  if (_justDragged) return; // 刚拖拽完，抑制这次点击以免误展开
   document.querySelectorAll('.task-card').forEach(c => {
     if (c.dataset.taskId === id) c.classList.toggle('expanded');
   });
@@ -2150,8 +2263,11 @@ function deletePending(id) {
 // ==================== Render: Treasury ====================
 function renderTreasury() {
   const entries = loadData(STORAGE.treasury);
+  // 统计只算当月（每月自动重置，不跨月累计）
+  const curMonthKey = getCurrentMonthKey();
+  const monthEntries = entries.filter(e => getMonthKey(e.createdAt) === curMonthKey);
   let aboveWater = 0, belowWater = 0, unreceivedTotal = 0;
-  entries.forEach(e => {
+  monthEntries.forEach(e => {
     const amt = parseFloat(e.amount) || 0;
     if (e.received) {
       if (e.type === 'above') aboveWater += amt;
@@ -2161,24 +2277,32 @@ function renderTreasury() {
     }
   });
   const total = aboveWater + belowWater;
+  // 上月结余：记录于本月之前、但至今仍未收入的款项
+  const carriedEntries = entries.filter(e => {
+    const k = getMonthKey(e.createdAt);
+    return k && k < curMonthKey && !e.received;
+  });
+  const carriedOver = carriedEntries.reduce((s, e) => s + (parseFloat(e.amount) || 0), 0);
+  const curMonthNum = parseInt(curMonthKey.split('-')[1], 10);
 
   document.getElementById('dashboard').innerHTML = `
     <div class="dash-card water-above">
       <div class="dash-icon">🌊</div>
-      <div class="dash-label">水上收入（已收）</div>
+      <div class="dash-label">${curMonthNum}月水上（已收）</div>
       <div class="dash-value">¥${fmt(aboveWater)}</div>
     </div>
     <div class="dash-card water-below">
       <div class="dash-icon">💧</div>
-      <div class="dash-label">水下收入（已收）</div>
+      <div class="dash-label">${curMonthNum}月水下（已收）</div>
       <div class="dash-value">¥${fmt(belowWater)}</div>
     </div>
     <div class="dash-card total">
       <div class="dash-icon">💗</div>
-      <div class="dash-label">已收入总金额</div>
+      <div class="dash-label">${curMonthNum}月已收入</div>
       <div class="dash-value">¥${fmt(total)}</div>
     </div>
-    ${unreceivedTotal > 0 ? `<div class="unreceived-note">⏳ 待收入 ¥${fmt(unreceivedTotal)}（未收入不计入统计）</div>` : ''}
+    ${unreceivedTotal > 0 ? `<div class="unreceived-note">⏳ ${curMonthNum}月待收入 ¥${fmt(unreceivedTotal)}（未收入不计入统计）</div>` : ''}
+    ${carriedOver > 0 ? `<div class="carryover-tag">📌 上月结余 · ${carriedEntries.length}笔未到账 · ¥${fmt(carriedOver)}</div>` : ''}
   `;
 
   const list = document.getElementById('treasury-list');
