@@ -59,9 +59,10 @@
 html, body {
   height: 100%;
   height: 100dvh;
+  height: 100lvh;
   /* PWA 独立模式下 iOS 的 100dvh 常小于真实屏幕高（底部留白），
-     用 JS 实测的 window.innerHeight 兜底 */
-  height: var(--app-height, 100dvh);
+     用 JS 实测值兜底：取 innerHeight 与 screen.height 的较大者 */
+  height: var(--app-height, 100lvh);
   width: 100%;
   margin: 0;
   padding: 0;
@@ -76,20 +77,16 @@ html, body {
   font-family: -apple-system, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
   font-size: 14px;
   color: var(--bark);
-  background: var(--moss-soft);
+  background: #F9E9D9;
   -webkit-font-smoothing: antialiased;
   user-select: none;
 }
 input, textarea, select { font-family: inherit; font-size: inherit; user-select: text; }
 
 /* ==================== Healing Pastel Background ==================== */
+/* 纯色兜底：与内容区渐变底色一致，任何视口计算偏差露出的缝隙都是同色，视觉无缝 */
 body {
-  background-color: #F4F1E6;
-  background-image:
-    radial-gradient(ellipse 70% 50% at 5% 5%, rgba(165, 214, 219, 0.45), transparent 65%),
-    radial-gradient(ellipse 60% 45% at 95% 10%, rgba(249, 233, 217, 0.5), transparent 65%),
-    radial-gradient(ellipse 55% 40% at 90% 90%, rgba(232, 232, 198, 0.55), transparent 65%),
-    radial-gradient(ellipse 50% 35% at 10% 95%, rgba(165, 214, 219, 0.3), transparent 65%);
+  background-color: #F9E9D9;
 }
 /* Subtle paper grain */
 body::before {
@@ -126,7 +123,8 @@ body::before {
   display: flex;
   height: 100vh;
   height: 100dvh;
-  height: var(--app-height, 100dvh);
+  height: 100lvh;
+  height: var(--app-height, 100lvh);
   width: 100vw;
   width: 100dvw;
   overflow: hidden;
@@ -1688,11 +1686,12 @@ body::before {
   document.body.removeChild(probe);
 })();
 
-// 真实可视高度：PWA 独立模式下 iOS 的 100dvh 常偏小，导致底部留白，
-// 这里用 window.innerHeight 实测值写进 CSS 变量兜底
+// 真实可视高度：iOS PWA 下 innerHeight/100dvh 都可能偏小（底部留白），
+// 取 innerHeight 与 screen.height 的较大者（应用锁定竖屏，screen.height 即全屏高）
 (function() {
   function setAppHeight() {
-    document.documentElement.style.setProperty('--app-height', window.innerHeight + 'px');
+    var h = Math.max(window.innerHeight || 0, (window.screen && window.screen.height) || 0);
+    document.documentElement.style.setProperty('--app-height', h + 'px');
   }
   setAppHeight();
   window.addEventListener('resize', setAppHeight);
