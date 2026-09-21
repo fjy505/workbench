@@ -584,6 +584,18 @@ body::before {
   color: var(--bark-mid);
   margin-bottom: 7px;
   padding-left: 22px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.drag-hint {
+  font-size: 9.5px;
+  color: var(--sky-deep);
+  background: rgba(255,255,255,0.7);
+  border: 1px dashed rgba(123,184,191,0.6);
+  border-radius: 6px;
+  padding: 1px 6px;
+  letter-spacing: 0.2px;
 }
 .collection-cards .task-card {
   background: #FFF;
@@ -1501,7 +1513,7 @@ body::before {
       <span class="modal-close" onclick="closeDataPanel()" style="font-size:20px;cursor:pointer;color:rgba(77,69,66,0.5);">✕</span>
     </div>
     <div style="font-size:10.5px;color:rgba(77,69,66,0.45);margin:-8px 0 14px;letter-spacing:0.3px;">
-      当前版本 v21 · 若此处仍是旧版本号，说明页面未更新
+      当前版本 v22 · 若此处仍是旧版本号，说明页面未更新
     </div>
     <div class="data-section">
       <div class="data-label">📤 导出备份</div>
@@ -1879,9 +1891,12 @@ function setManualOrder(name, ids) {
   localStorage.setItem('kitty_order_' + name, JSON.stringify(ids));
 }
 
-/* ===== 合集内拖拽排序：按住任务卡片上下拖即可换位 ===== */
+/* ===== 合集内拖拽排序：长按任务卡片后上下拖即可换位 ===== */
 let _drag = null;
+let _dragTimer = null;
 let _justDragged = false; // 拖动结束后抑制一次 click，避免误触发展开
+const DRAG_HOLD_MS = 400;  // 长按多久进入拖拽（防误触）
+const DRAG_CANCEL_PX = 10; // 未进入拖拽前移动超过此距离 → 判定为滑动列表，取消拖拽
 
 function startDrag(ev) {
   const card = ev.currentTarget;
@@ -1894,11 +1909,20 @@ function startDrag(ev) {
   _drag = {
     card: card, wrap: wrap,
     name: wrap.getAttribute('data-cname') || '',
-    startY: pt.clientY, lastY: pt.clientY,
-    offset: 0, active: false
+    startY: pt.clientY, lastY: pt.clientY, startX: pt.clientX,
+    offset: 0, armed: false
   };
+  // 长按 400ms 才进入拖拽：滑动列表时不会误触发
+  _dragTimer = setTimeout(() => {
+    if (!_drag) return;
+    _drag.armed = true;
+    _drag.lastY = _drag.startY; // 重置基准，避免进入拖拽瞬间跳动
+    _drag.card.classList.add('dragging');
+    if (navigator.vibrate) { try { navigator.vibrate(12); } catch (e) {} }
+  }, DRAG_HOLD_MS);
   const move = e2 => dragMove(e2.touches ? e2.touches[0] : e2, e2);
   const up = () => {
+    if (_dragTimer) { clearTimeout(_dragTimer); _dragTimer = null; }
     document.removeEventListener('touchmove', move);
     document.removeEventListener('touchend', up);
     document.removeEventListener('mousemove', move);
@@ -1913,10 +1937,15 @@ function startDrag(ev) {
 
 function dragMove(pt, rawEv) {
   if (!_drag) return;
-  if (!_drag.active) {
-    if (Math.abs(pt.clientY - _drag.startY) < 6) return; // 未过阈值 → 当作点击，不影响展开
-    _drag.active = true;
-    _drag.card.classList.add('dragging');
+  if (!_drag.armed) {
+    // 长按未满：手指一移动超过阈值就判定为「滑动列表」，直接放弃拖拽
+    const dy = Math.abs(pt.clientY - _drag.startY);
+    const dx = Math.abs(pt.clientX - _drag.startX);
+    if (dy > DRAG_CANCEL_PX || dx > DRAG_CANCEL_PX) {
+      if (_dragTimer) { clearTimeout(_dragTimer); _dragTimer = null; }
+      _drag = null;
+    }
+    return;
   }
   if (rawEv && rawEv.preventDefault) rawEv.preventDefault();
   const delta = pt.clientY - _drag.lastY;
@@ -1955,7 +1984,7 @@ function endDrag() {
   if (!_drag) return;
   const d = _drag;
   _drag = null;
-  if (!d.active) return; // 只是点了一下，交给原本的点击事件
+  if (!d.armed) return; // 未进入拖拽（只是点或滑），交给原本的交互处理
   d.card.classList.remove('dragging');
   d.card.style.transform = '';
   _justDragged = true;
@@ -2094,7 +2123,7 @@ function renderAccepted() {
             <span class="collection-count">${doneCount}/${items.length}</span>
             <span class="collection-fee">¥${totalFee}</span>
           </div>
-          <div class="collection-deadline">截止：${edl === '9999' ? '未设置' : esc(edl)}</div>
+          <div class="collection-deadline">截止：${edl === '9999' ? '未设置' : esc(edl)}<span class="drag-hint">长按卡片可排序</span></div>
           <div class="collection-cards" data-cname="${escAttr(name)}">${items.map(x => renderCard(x, { name, inCollection: true })).join('')}</div>
         </div>`;
     }
