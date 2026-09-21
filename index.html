@@ -2909,6 +2909,15 @@ renderAccepted();
 
 // ==================== Service Worker (离线缓存) ====================
 if ('serviceWorker' in navigator) {
+  // 新版本 SW 接管时自动刷新一次页面，根治「要刷两次才更新」的问题
+  // （首次安装时页面本身就是新的，不刷新；仅在「更新」场景刷新）
+  let swRefreshing = false;
+  const hadController = !!navigator.serviceWorker.controller;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!hadController || swRefreshing) return;
+    swRefreshing = true;
+    window.location.reload();
+  });
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./sw.js').catch(() => {});
   });
